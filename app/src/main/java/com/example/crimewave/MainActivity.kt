@@ -4,13 +4,18 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.runtime.*
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.crimewave.ui.screens.HomeScreen
+import com.example.crimewave.ui.screens.ProfileScreen
+import com.example.crimewave.ui.screens.SettingsScreen
+import com.example.crimewave.ui.screens.DetailsScreen
+import com.example.crimewave.ui.screens.ReportScreen
+import com.example.crimewave.ui.screens.StatsScreen
+import com.example.crimewave.ui.screens.LoginScreen
+import com.example.crimewave.ui.screens.RegisterScreen
+import com.example.crimewave.ui.viewmodel.ClothingViewModel
+import com.example.crimewave.ui.viewmodel.AuthViewModel
 import com.example.crimewave.ui.theme.CrimewaveTheme
 
 class MainActivity : ComponentActivity() {
@@ -19,29 +24,78 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             CrimewaveTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+                CrimewaveApp()
             }
         }
     }
 }
 
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
+fun CrimewaveApp() {
+    val clothingViewModel: ClothingViewModel = viewModel()
+    val authViewModel: AuthViewModel = viewModel()
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    CrimewaveTheme {
-        Greeting("Android")
+    var currentScreen by remember { mutableStateOf("login") }
+    var selectedItemId by remember { mutableStateOf("") }
+
+    val authState by authViewModel.authState
+
+    // Navegación condicional basada en autenticación
+    if (authState.isAuthenticated) {
+        // Usuario autenticado - mostrar aplicación principal
+        when (currentScreen) {
+            "login", "register" -> currentScreen = "home" // Redirigir a home si ya está autenticado
+            "home" -> HomeScreen(
+                onNavigateToProfile = { currentScreen = "profile" },
+                onNavigateToDetails = { itemId ->
+                    selectedItemId = itemId
+                    currentScreen = "details"
+                },
+                onNavigateToReport = { currentScreen = "report" }
+            )
+            "profile" -> ProfileScreen(
+                onNavigateBack = { currentScreen = "home" },
+                onNavigateToSettings = { currentScreen = "settings" },
+                onNavigateToStats = { currentScreen = "stats" },
+                onLogout = {
+                    authViewModel.logout()
+                    currentScreen = "login"
+                }
+            )
+            "settings" -> SettingsScreen(
+                onNavigateBack = { currentScreen = "profile" }
+            )
+            "details" -> DetailsScreen(
+                itemId = selectedItemId,
+                onNavigateBack = { currentScreen = "home" }
+            )
+            "report" -> ReportScreen(
+                onNavigateBack = { currentScreen = "home" },
+                onReportSubmitted = {
+                    currentScreen = "home"
+                }
+            )
+            "stats" -> StatsScreen(
+                onNavigateBack = { currentScreen = "profile" }
+            )
+        }
+    } else {
+        // Usuario no autenticado - mostrar pantallas de autenticación
+        when (currentScreen) {
+            "login" -> LoginScreen(
+                authViewModel = authViewModel,
+                onLoginSuccess = { currentScreen = "home" },
+                onNavigateToRegister = { currentScreen = "register" }
+            )
+            "register" -> RegisterScreen(
+                authViewModel = authViewModel,
+                onRegisterSuccess = { currentScreen = "home" },
+                onNavigateToLogin = { currentScreen = "login" }
+            )
+            else -> {
+                // Si por alguna razón está en otra pantalla sin estar autenticado, redirigir a login
+                currentScreen = "login"
+            }
+        }
     }
 }
