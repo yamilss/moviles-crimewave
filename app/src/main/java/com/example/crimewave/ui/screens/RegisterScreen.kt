@@ -38,6 +38,13 @@ fun RegisterScreen(
     var confirmPassword by remember { mutableStateOf("") }
     val authState by authViewModel.authState
 
+    // Validaciones en tiempo real
+    val isValidEmail = email.trim().isNotBlank() && android.util.Patterns.EMAIL_ADDRESS.matcher(email.trim()).matches()
+    val isValidPhone = phoneNumber.length == 9 && phoneNumber.all { it.isDigit() }
+    val isValidPassword = password.length >= 4
+    val passwordsMatch = password == confirmPassword
+    val isValidForm = isValidEmail && isValidPhone && isValidPassword && passwordsMatch
+
     // Efectos secundarios para manejar el éxito del registro
     LaunchedEffect(authState.isAuthenticated) {
         if (authState.isAuthenticated) {
@@ -239,11 +246,20 @@ fun RegisterScreen(
                 // Botón REGISTRARSE
                 Button(
                     onClick = {
-                        authViewModel.register(email, phoneNumber, password, confirmPassword)
+                        if (isValidForm) {
+                            authViewModel.register(
+                                email.trim(),
+                                phoneNumber.trim(),
+                                password.trim(),
+                                confirmPassword.trim()
+                            )
+                        }
                     },
                     modifier = Modifier.fillMaxWidth(),
+                    enabled = isValidForm,
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.Transparent
+                        containerColor = Color.Transparent,
+                        disabledContainerColor = Color.Gray.copy(alpha = 0.3f)
                     ),
                     shape = RoundedCornerShape(25.dp)
                 ) {

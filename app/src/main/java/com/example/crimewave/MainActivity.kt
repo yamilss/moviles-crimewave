@@ -45,8 +45,17 @@ fun CrimewaveApp() {
 
     val authState by authViewModel.authState
 
+    // Validaciones de seguridad para evitar NPEs y navegación incorrecta
+    val isAuthenticated = authState.isAuthenticated
+    val currentUser = authState.currentUser
+
+    // Si está autenticado, asegurar que no esté en pantallas de auth
+    if (isAuthenticated && (currentScreen == "login" || currentScreen == "register")) {
+        currentScreen = "home"
+    }
+
     // Navegación condicional basada en autenticación
-    if (authState.isAuthenticated) {
+    if (isAuthenticated) {
         // Usuario autenticado - mostrar aplicación principal
         when (currentScreen) {
             "login", "register" -> currentScreen = "home" // Redirigir a home si ya está autenticado
@@ -54,16 +63,24 @@ fun CrimewaveApp() {
                 clothingViewModel = clothingViewModel,
                 onNavigateToProfile = { currentScreen = "profile" },
                 onNavigateToDetails = { itemId ->
-                    selectedItemId = itemId
-                    currentScreen = "details"
+                    // Validar que el itemId no sea nulo o vacío antes de navegar
+                    if (!itemId.isNullOrBlank()) {
+                        selectedItemId = itemId
+                        currentScreen = "details"
+                    }
                 },
                 onNavigateToReport = { currentScreen = "report" },
-                isAdmin = authState.currentUser?.isAdmin ?: false
+                isAdmin = currentUser?.isAdmin ?: false
             )
             "profile" -> ProfileScreen(
                 onNavigateBack = { currentScreen = "home" },
                 onNavigateToSettings = { currentScreen = "settings" },
-                onNavigateToStats = { currentScreen = "stats" },
+                onNavigateToStats = {
+                    // Solo permitir acceso a stats si es administrador
+                    if (currentUser?.isAdmin == true) {
+                        currentScreen = "stats"
+                    }
+                },
                 onNavigateToEditDetails = { currentScreen = "editDetails" },
                 onNavigateToReport = { currentScreen = "report" },
                 onNavigateToShippingAddress = { currentScreen = "viewShippingAddress" },
@@ -72,18 +89,26 @@ fun CrimewaveApp() {
                     authViewModel.logout()
                     currentScreen = "login"
                 },
-                userEmail = authState.currentUser?.email ?: "",
-                userPhone = authState.currentUser?.phoneNumber,
-                isAdmin = authState.currentUser?.isAdmin ?: false
+                userEmail = currentUser?.email ?: "",
+                userPhone = currentUser?.phoneNumber,
+                isAdmin = currentUser?.isAdmin ?: false
             )
             "settings" -> SettingsScreen(
                 onNavigateBack = { currentScreen = "profile" }
             )
-            "details" -> DetailsScreen(
-                itemId = selectedItemId,
-                clothingViewModel = clothingViewModel,
-                onNavigateBack = { currentScreen = "home" }
-            )
+            "details" -> {
+                // Validar que exista un id seleccionado válido
+                if (selectedItemId.isNotBlank()) {
+                    DetailsScreen(
+                        itemId = selectedItemId,
+                        clothingViewModel = clothingViewModel,
+                        onNavigateBack = { currentScreen = "home" }
+                    )
+                } else {
+                    // Si no hay id válido, regresar a home
+                    currentScreen = "home"
+                }
+            }
             "report" -> ReportScreen(
                 clothingViewModel = clothingViewModel,
                 onNavigateBack = { currentScreen = "home" },
@@ -91,17 +116,24 @@ fun CrimewaveApp() {
                     currentScreen = "home"
                 }
             )
-            "stats" -> EmployeePanelScreen(
-                clothingViewModel = clothingViewModel,
-                onNavigateBack = { currentScreen = "profile" },
-                onNavigateToAddProduct = { currentScreen = "report" }
-            )
+            "stats" -> {
+                // Pantalla de administración: solo accesible si es admin
+                if (currentUser?.isAdmin == true) {
+                    EmployeePanelScreen(
+                        clothingViewModel = clothingViewModel,
+                        onNavigateBack = { currentScreen = "profile" },
+                        onNavigateToAddProduct = { currentScreen = "report" }
+                    )
+                } else {
+                    currentScreen = "home"
+                }
+            }
             "editDetails" -> EditDetailsScreen(
                 authViewModel = authViewModel,
                 onNavigateBack = { currentScreen = "profile" },
                 onUpdateSuccess = { currentScreen = "profile" },
-                currentEmail = authState.currentUser?.email ?: "",
-                currentPhone = authState.currentUser?.phoneNumber
+                currentEmail = currentUser?.email ?: "",
+                currentPhone = currentUser?.phoneNumber
             )
             "viewShippingAddress" -> ViewShippingAddressScreen(
                 onNavigateBack = { currentScreen = "profile" },
@@ -121,6 +153,10 @@ fun CrimewaveApp() {
                 onNavigateBack = { currentScreen = "viewBillingAddress" },
                 authViewModel = authViewModel
             )
+            else -> {
+                // Pantalla desconocida - redirigir a home por seguridad
+                currentScreen = "home"
+            }
         }
     } else {
         // Usuario no autenticado - mostrar pantallas de autenticación

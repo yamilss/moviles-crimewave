@@ -35,6 +35,17 @@ fun EditDetailsScreen(
     var errorMessage by remember { mutableStateOf<String?>(null) }
     val authState by authViewModel.authState
 
+    // Validaciones en tiempo real
+    val isValidPhone = phone.isEmpty() || (phone.length == 9 && phone.all { it.isDigit() })
+    val isValidNewPassword = newPassword.isEmpty() || newPassword.length >= 4
+    val passwordsMatch = newPassword == confirmNewPassword
+    val hasRequiredPassword = currentPassword.isNotBlank()
+
+    // Validación completa del formulario
+    val isFormValid = hasRequiredPassword && isValidPhone && isValidNewPassword &&
+                     (newPassword.isEmpty() || passwordsMatch) &&
+                     (phone != currentPhone || newPassword.isNotBlank())
+
     // Observar errores del ViewModel
     LaunchedEffect(authState.error) {
         authState.error?.let { error ->
@@ -255,38 +266,44 @@ fun EditDetailsScreen(
                         // Botón Confirmar
                         Button(
                             onClick = {
-                                // Validaciones
-                                when {
-                                    currentPassword.isBlank() -> {
-                                        errorMessage = "Debe ingresar su contraseña actual"
-                                    }
-                                    newPassword.isNotBlank() && newPassword != confirmNewPassword -> {
-                                        errorMessage = "Las nuevas contraseñas no coinciden"
-                                    }
-                                    newPassword.isNotBlank() && newPassword.length < 4 -> {
-                                        errorMessage = "La nueva contraseña debe tener al menos 4 caracteres"
-                                    }
-                                    phone.isNotBlank() && phone.length != 9 -> {
-                                        errorMessage = "El teléfono debe tener exactamente 9 dígitos"
-                                    }
-                                    else -> {
-                                        val success = authViewModel.updateUserDetails(
-                                            currentPassword = currentPassword,
-                                            newPhone = if (phone.isNotBlank()) phone else null,
-                                            newPassword = if (newPassword.isNotBlank()) newPassword else null
-                                        )
+                                try {
+                                    // Limpiar errores previos
+                                    errorMessage = null
+                                    authViewModel.clearError()
 
-                                        if (success) {
-                                            onUpdateSuccess()
-                                        } else {
-                                            errorMessage = "Error al actualizar los datos"
-                                        }
+                                    // Validaciones adicionales
+                                    if (!isValidPhone) {
+                                        errorMessage = "El teléfono debe tener exactamente 9 dígitos"
+                                        return@Button
                                     }
+
+                                    if (!isValidNewPassword) {
+                                        errorMessage = "La nueva contraseña debe tener al menos 4 caracteres"
+                                        return@Button
+                                    }
+
+                                    if (!passwordsMatch) {
+                                        errorMessage = "Las nuevas contraseñas no coinciden"
+                                        return@Button
+                                    }
+
+                                    val success = authViewModel.updateUserDetails(
+                                        currentPassword = currentPassword,
+                                        newPhone = if (phone.isNotBlank() && phone != currentPhone) phone else null,
+                                        newPassword = if (newPassword.isNotBlank()) newPassword else null
+                                    )
+
+                                    if (success) {
+                                        onUpdateSuccess()
+                                    }
+                                } catch (e: Exception) {
+                                    errorMessage = "Error inesperado al actualizar los datos"
                                 }
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(55.dp),
+                            enabled = isFormValid,
                             shape = RoundedCornerShape(25.dp),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = Color.Transparent

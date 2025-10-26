@@ -37,6 +37,9 @@ fun LoginScreen(
     var password by remember { mutableStateOf("") }
     val authState by authViewModel.authState
 
+    // Validaciones en tiempo real
+    val isValidForm = email.trim().isNotBlank() && password.trim().isNotBlank()
+
     // Efectos secundarios para manejar el éxito del login
     LaunchedEffect(authState.isAuthenticated) {
         if (authState.isAuthenticated) {
@@ -114,7 +117,7 @@ fun LoginScreen(
                 // Campo E-MAIL
                 Column {
                     Text(
-                        text = "E-MAIL",
+                        text = "E-mail",
                         color = Color.White,
                         fontSize = 14.sp,
                         modifier = Modifier.padding(bottom = 8.dp)
@@ -188,10 +191,16 @@ fun LoginScreen(
 
                 // Botón INICIAR SESIÓN
                 Button(
-                    onClick = { authViewModel.login(email, password) },
+                    onClick = {
+                        if (isValidForm) {
+                            authViewModel.login(email.trim(), password.trim())
+                        }
+                    },
                     modifier = Modifier.fillMaxWidth(),
+                    enabled = isValidForm,
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.Transparent
+                        containerColor = Color.Transparent,
+                        disabledContainerColor = Color.Gray.copy(alpha = 0.3f)
                     ),
                     shape = RoundedCornerShape(25.dp)
                 ) {

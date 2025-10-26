@@ -117,9 +117,25 @@ class AuthViewModel : ViewModel() {
         val currentUser = _authState.value.currentUser ?: return false
 
         // Verificar contraseña actual
-        if (currentUser.password != currentPassword) {
+        if (currentPassword.isBlank() || currentUser.password != currentPassword) {
             _authState.value = _authState.value.copy(error = "Contraseña actual incorrecta")
             return false
+        }
+
+        // Validar nuevo teléfono si se proporciona
+        if (!newPhone.isNullOrBlank()) {
+            if (newPhone.length != 9 || !newPhone.all { it.isDigit() }) {
+                _authState.value = _authState.value.copy(error = "El número debe tener 9 dígitos")
+                return false
+            }
+        }
+
+        // Validar nueva contraseña si se proporciona
+        if (!newPassword.isNullOrBlank()) {
+            if (newPassword.length < 4) {
+                _authState.value = _authState.value.copy(error = "La contraseña debe tener al menos 4 caracteres")
+                return false
+            }
         }
 
         // Crear usuario actualizado
@@ -155,6 +171,21 @@ class AuthViewModel : ViewModel() {
         instagram: String
     ): Boolean {
         val currentUser = _authState.value.currentUser ?: return false
+
+        // Validaciones
+        if (nombre.isBlank() || apellidos.isBlank() || direccion.isBlank() ||
+            rut.isBlank() || ciudad.isBlank() || codigoPostal.isBlank() ||
+            pais.isBlank() || region.isBlank() || celular.isBlank()) {
+            _authState.value = _authState.value.copy(error = "Por favor complete todos los campos obligatorios")
+            return false
+        }
+
+        // Validar celular de 9 dígitos
+        if (celular.length != 9 || !celular.all { it.isDigit() }) {
+            _authState.value = _authState.value.copy(error = "El celular debe tener exactamente 9 dígitos")
+            return false
+        }
+
 
         val shippingAddress = com.example.crimewave.data.model.ShippingAddress(
             nombre = nombre,
@@ -196,7 +227,33 @@ class AuthViewModel : ViewModel() {
     ): Boolean {
         val currentUser = _authState.value.currentUser ?: return false
 
+        // Validaciones
+        if (nombre.isBlank() || apellidos.isBlank() || direccion.isBlank() ||
+            rut.isBlank() || ciudad.isBlank() || codigoPostal.isBlank() ||
+            pais.isBlank() || region.isBlank() || celular.isBlank()) {
+            _authState.value = _authState.value.copy(error = "Por favor complete todos los campos obligatorios")
+            return false
+        }
+
+        // Validar celular de 9 dígitos
+        if (celular.length != 9 || !celular.all { it.isDigit() }) {
+            _authState.value = _authState.value.copy(error = "El celular debe tener exactamente 9 dígitos")
+            return false
+        }
+
+        // Validar RUT de 9 dígitos
+        if (rut.length != 9 || !rut.all { it.isDigit() }) {
+            _authState.value = _authState.value.copy(error = "El RUT debe tener exactamente 9 dígitos")
+            return false
+        }
+
         val billingAddress = com.example.crimewave.data.model.BillingAddress(
+        if (rut.length != 9 || !rut.all { it.isDigit() }) {
+            _authState.value = _authState.value.copy(error = "El RUT debe tener exactamente 9 dígitos")
+            return false
+        }
+
+        val shippingAddress = com.example.crimewave.data.model.ShippingAddress(
             nombre = nombre,
             apellidos = apellidos,
             direccion = direccion,
@@ -235,6 +292,8 @@ class AuthViewModel : ViewModel() {
         _authState.value = _authState.value.copy(currentUser = updatedUser)
         return true
     }
+
+
 
     fun deleteBillingAddress(): Boolean {
         val currentUser = _authState.value.currentUser ?: return false

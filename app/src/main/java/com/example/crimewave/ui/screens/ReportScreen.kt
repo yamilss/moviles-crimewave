@@ -734,23 +734,40 @@ fun ReportScreen(
 
                 Button(
                     onClick = {
-                        // Crear nuevo producto
-                        val newProduct = ClothingItem(
-                            id = clothingViewModel.generateNextProductId(),
-                            name = productName,
-                            description = description,
-                            price = price.toDoubleOrNull() ?: 0.0,
-                            imageUrl = "default_product",
-                            category = selectedCategory,
-                            isNew = true,
-                            isFeatured = false,
-                            sizes = if (selectedSizes.isNotEmpty()) selectedSizes.keys.toList() else availableOptions.take(1),
-                            stock = stock.toIntOrNull() ?: 10
-                        )
+                        try {
+                            // Validaciones adicionales antes de crear el producto
+                            val finalPrice = price.toDoubleOrNull()
+                            val finalStock = stock.toIntOrNull() ?: 10
 
-                        // Agregar al ViewModel
-                        clothingViewModel.addProduct(newProduct)
-                        onReportSubmitted()
+                            if (finalPrice == null || finalPrice < 15000) {
+                                return@Button // No crear el producto si el precio es inválido
+                            }
+
+                            if (finalStock < 0) {
+                                return@Button // No crear el producto si el stock es negativo
+                            }
+
+                            // Crear nuevo producto
+                            val newProduct = ClothingItem(
+                                id = clothingViewModel.generateNextProductId(),
+                                name = productName.trim(),
+                                description = description.trim(),
+                                price = finalPrice,
+                                imageUrl = "default_product",
+                                category = selectedCategory,
+                                isNew = true,
+                                isFeatured = false,
+                                sizes = if (selectedSizes.isNotEmpty()) selectedSizes.keys.toList() else availableOptions.take(1),
+                                stock = finalStock
+                            )
+
+                            // Agregar al ViewModel (ya tiene validaciones internas)
+                            clothingViewModel.addProduct(newProduct)
+                            onReportSubmitted()
+                        } catch (e: Exception) {
+                            // En caso de error, no hacer nada (las validaciones del ViewModel ya manejan los errores)
+                            return@Button
+                        }
                     },
                     modifier = Modifier
                         .height(56.dp)
@@ -758,11 +775,13 @@ fun ReportScreen(
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color(0xFF2196F3)
                     ),
-                    enabled = productName.isNotBlank() &&
-                             description.isNotBlank() &&
+                    enabled = productName.trim().isNotBlank() &&
+                             description.trim().isNotBlank() &&
                              price.isNotBlank() &&
                              isValidPrice &&
-                             (stock.isEmpty() || isValidStock),
+                             isValidStock &&
+                             productName.trim().length <= 100 &&
+                             description.trim().length <= 500,
                     shape = RoundedCornerShape(12.dp),
                     elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
                 ) {

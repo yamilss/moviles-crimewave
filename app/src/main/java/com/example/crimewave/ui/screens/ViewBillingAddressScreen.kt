@@ -168,7 +168,7 @@ fun ViewBillingAddressScreen(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Column(modifier = Modifier.weight(1f)) {
+                            Column(modifier = Modifier.fillMaxWidth()) {
                                 Text(
                                     text = "CELL",
                                     fontSize = 11.sp,
@@ -177,21 +177,6 @@ fun ViewBillingAddressScreen(
                                 )
                                 Text(
                                     text = billingAddress.celular.ifEmpty { "No especificado" },
-                                    fontSize = 14.sp,
-                                    color = Color.Black,
-                                    fontWeight = FontWeight.Medium
-                                )
-                            }
-
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = "RUT (DNI)",
-                                    fontSize = 11.sp,
-                                    color = Color(0xFF6B7280),
-                                    fontWeight = FontWeight.Medium
-                                )
-                                Text(
-                                    text = billingAddress.rut,
                                     fontSize = 14.sp,
                                     color = Color.Black,
                                     fontWeight = FontWeight.Medium

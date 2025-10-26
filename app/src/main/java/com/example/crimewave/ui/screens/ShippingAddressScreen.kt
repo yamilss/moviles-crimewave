@@ -21,6 +21,18 @@ private fun validateCelular(celular: String): Boolean {
     return celular.length == 9 && celular.all { it.isDigit() }
 }
 
+
+
+// Función para validar nombre (solo letras y espacios)
+private fun validateName(name: String): Boolean {
+    return name.isNotBlank() && name.all { it.isLetter() || it.isWhitespace() } && name.length <= 50
+}
+
+// Función para validar código postal
+private fun validatePostalCode(code: String): Boolean {
+    return code.isNotBlank() && code.length <= 10 && code.all { it.isDigit() || it == '-' }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ShippingAddressScreen(
@@ -43,8 +55,19 @@ fun ShippingAddressScreen(
     var regionExpanded by remember { mutableStateOf(false) }
     var showSuccessDialog by remember { mutableStateOf(false) }
 
-    // Validación para celular
+    // Validaciones en tiempo real
     val isValidCelular = celular.isEmpty() || validateCelular(celular)
+    val isValidRut = rut.isEmpty() || (rut.length == 9 && rut.all { it.isDigit() })
+    val isValidNombre = validateName(nombre)
+    val isValidApellidos = validateName(apellidos)
+    val isValidCodigoPostal = codigoPostal.isEmpty() || validatePostalCode(codigoPostal)
+
+    // Validación completa del formulario
+    val isFormValid = nombre.isNotBlank() && apellidos.isNotBlank() &&
+                     direccion.isNotBlank() && rut.isNotBlank() &&
+                     ciudad.isNotBlank() && region.isNotBlank() &&
+                     celular.isNotBlank() && isValidCelular && isValidRut &&
+                     isValidNombre && isValidApellidos && isValidCodigoPostal
 
     val authState by authViewModel.authState
 
@@ -483,9 +506,7 @@ fun ShippingAddressScreen(
                         containerColor = Color(0xFF7C4DFF)
                     ),
                     shape = RoundedCornerShape(25.dp),
-                    enabled = nombre.isNotBlank() && apellidos.isNotBlank() &&
-                             direccion.isNotBlank() && rut.isNotBlank() &&
-                             ciudad.isNotBlank() && region.isNotBlank() && isValidCelular
+                    enabled = isFormValid
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
