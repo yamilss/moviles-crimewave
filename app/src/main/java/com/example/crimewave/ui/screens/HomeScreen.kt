@@ -6,38 +6,54 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.example.crimewave.data.model.ClothingItem
-import com.example.crimewave.data.model.ProductType
 import com.example.crimewave.ui.components.ProductCard
 import com.example.crimewave.ui.viewmodel.ClothingViewModel
-import com.example.crimewave.R
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     clothingViewModel: ClothingViewModel,
+    cartViewModel: com.example.crimewave.ui.viewmodel.CartViewModel,
     onNavigateToProfile: () -> Unit,
     onNavigateToDetails: (String) -> Unit,
     onNavigateToReport: () -> Unit,
+    onNavigateToCart: () -> Unit,
     isAdmin: Boolean = false
 ) {
     // Obtener productos del ViewModel
     val allProducts by clothingViewModel.products
     val featuredProducts = allProducts.take(6) // Mostrar los primeros 6 productos
+    val cartState by cartViewModel.cartState
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Catálago") },
                 actions = {
+                    // Botón del carrito con badge
+                    Box {
+                        IconButton(onClick = onNavigateToCart) {
+                            Icon(Icons.Default.ShoppingCart, contentDescription = "Carrito")
+                        }
+                        if (cartState.totalItems > 0) {
+                            Badge(
+                                modifier = Modifier.offset(x = (-8).dp, y = 8.dp)
+                            ) {
+                                Text(
+                                    text = cartState.totalItems.toString(),
+                                    style = MaterialTheme.typography.labelSmall
+                                )
+                            }
+                        }
+                    }
+
                     IconButton(onClick = onNavigateToProfile) {
                         Icon(Icons.Default.Person, contentDescription = "Perfil")
                     }

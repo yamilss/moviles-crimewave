@@ -24,9 +24,14 @@ import com.example.crimewave.ui.screens.ShippingAddressScreen
 import com.example.crimewave.ui.screens.BillingAddressScreen
 import com.example.crimewave.ui.screens.ViewShippingAddressScreen
 import com.example.crimewave.ui.screens.ViewBillingAddressScreen
+import com.example.crimewave.ui.screens.CartScreen
+import com.example.crimewave.ui.screens.CheckoutScreen
+import com.example.crimewave.ui.screens.OrderResultScreen
 import com.example.crimewave.ui.viewmodel.ClothingViewModel
 import com.example.crimewave.ui.viewmodel.AuthViewModel
+import com.example.crimewave.ui.viewmodel.CartViewModel
 import com.example.crimewave.ui.theme.CrimewaveTheme
+import com.example.crimewave.ui.animations.AnimatedScreenTransition
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -48,8 +53,10 @@ fun CrimewaveApp(
 ) {
     val clothingViewModel: ClothingViewModel = viewModel()
     val authViewModel: AuthViewModel = viewModel()
+    val cartViewModel: CartViewModel = viewModel()
 
     var currentScreen by remember { mutableStateOf("login") }
+    var previousScreen by remember { mutableStateOf("login") }
     var selectedItemId by remember { mutableStateOf("") }
     var navigationStack by remember { mutableStateOf(listOf<String>()) }
     var showExitDialog by remember { mutableStateOf(false) }
@@ -62,6 +69,7 @@ fun CrimewaveApp(
 
     // Si está autenticado, asegurar que no esté en pantallas de auth
     if (isAuthenticated && (currentScreen == "login" || currentScreen == "register")) {
+        previousScreen = currentScreen
         currentScreen = "home"
         navigationStack = emptyList()
     }
@@ -70,6 +78,7 @@ fun CrimewaveApp(
     fun navigateToScreen(screen: String) {
         if (currentScreen != screen) {
             navigationStack = navigationStack + currentScreen
+            previousScreen = currentScreen
             currentScreen = screen
         }
     }
@@ -77,6 +86,7 @@ fun CrimewaveApp(
     // Función para navegar hacia atrás
     fun navigateBack() {
         if (navigationStack.isNotEmpty()) {
+            previousScreen = currentScreen
             currentScreen = navigationStack.lastOrNull() ?: "home"
             navigationStack = navigationStack.dropLast(1)
         } else if (currentScreen == "home") {
@@ -85,8 +95,10 @@ fun CrimewaveApp(
             // Mostrar diálogo de confirmación también en pantallas de autenticación
             showExitDialog = true
         } else if (isAuthenticated) {
+            previousScreen = currentScreen
             currentScreen = "home"
         } else {
+            previousScreen = currentScreen
             currentScreen = "login"
         }
     }
@@ -98,11 +110,16 @@ fun CrimewaveApp(
 
     // Navegación condicional basada en autenticación
     if (isAuthenticated) {
-        // Usuario autenticado - mostrar aplicación principal
-        when (currentScreen) {
+        // Usuario autenticado - mostrar aplicación principal con animaciones de slide
+        AnimatedScreenTransition(
+            targetScreen = currentScreen,
+            previousScreen = previousScreen
+        ) {
+            when (currentScreen) {
             "login", "register" -> currentScreen = "home" // Redirigir a home si ya está autenticado
             "home" -> HomeScreen(
                 clothingViewModel = clothingViewModel,
+                cartViewModel = cartViewModel,
                 onNavigateToProfile = { navigateToScreen("profile") },
                 onNavigateToDetails = { itemId ->
                     // Validar que el itemId no sea nulo o vacío antes de navegar
@@ -112,6 +129,7 @@ fun CrimewaveApp(
                     }
                 },
                 onNavigateToReport = { navigateToScreen("report") },
+                onNavigateToCart = { navigateToScreen("cart") },
                 isAdmin = currentUser?.isAdmin ?: false
             )
             "profile" -> ProfileScreen(
@@ -130,6 +148,7 @@ fun CrimewaveApp(
                 onLogout = {
                     authViewModel.logout()
                     navigationStack = emptyList()
+                    previousScreen = currentScreen
                     currentScreen = "login"
                 },
                 userEmail = currentUser?.email ?: "",
@@ -145,10 +164,12 @@ fun CrimewaveApp(
                     DetailsScreen(
                         itemId = selectedItemId,
                         clothingViewModel = clothingViewModel,
+                        cartViewModel = cartViewModel,
                         onNavigateBack = { navigateBack() }
                     )
                 } else {
                     // Si no hay id válido, regresar a home
+                    previousScreen = currentScreen
                     currentScreen = "home"
                 }
             }
@@ -157,6 +178,7 @@ fun CrimewaveApp(
                 onNavigateBack = { navigateBack() },
                 onReportSubmitted = {
                     navigationStack = emptyList()
+                    previousScreen = currentScreen
                     currentScreen = "home"
                 }
             )
@@ -169,6 +191,7 @@ fun CrimewaveApp(
                         onNavigateToAddProduct = { navigateToScreen("report") }
                     )
                 } else {
+                    previousScreen = currentScreen
                     currentScreen = "home"
                 }
             }
@@ -197,29 +220,62 @@ fun CrimewaveApp(
                 onNavigateBack = { navigateBack() },
                 authViewModel = authViewModel
             )
-            else -> {
-                // Pantalla desconocida - redirigir a home por seguridad
-                currentScreen = "home"
+            "cart" -> CartScreen(
+                cartViewModel = cartViewModel,
+                onNavigateBack = { navigateBack() },
+                onNavigateToCheckout = { navigateToScreen("checkout") }
+            )
+            "checkout" -> CheckoutScreen(
+                cartViewModel = cartViewModel,
+                onNavigateBack = { navigateBack() },
+                onOrderProcessed = { navigateToScreen("orderResult") }
+            )
+            "orderResult" -> OrderResultScreen(
+                cartViewModel = cartViewModel,
+                onNavigateToHome = {
+                    navigationStack = emptyList()
+                    previousScreen = currentScreen
+                    currentScreen = "home"
+                },
+                onNavigateToCart = { navigateBack() }
+            )
+                else -> {
+                    // Pantalla desconocida - redirigir a home por seguridad
+                    previousScreen = currentScreen
+                    currentScreen = "home"
+                }
             }
         }
     } else {
-        // Usuario no autenticado - mostrar pantallas de autenticación
-        when (currentScreen) {
-            "login" -> LoginScreen(
-                authViewModel = authViewModel,
-                onLoginSuccess = { currentScreen = "home" },
-                onNavigateToRegister = { navigateToScreen("register") },
-                onBackPressed = { navigateBack() }
-            )
-            "register" -> RegisterScreen(
-                authViewModel = authViewModel,
-                onRegisterSuccess = { currentScreen = "home" },
-                onNavigateToLogin = { navigateBack() },
-                onBackPressed = { navigateBack() }
-            )
-            else -> {
-                // Si por alguna razón está en otra pantalla sin estar autenticado, redirigir a login
-                currentScreen = "login"
+        // Usuario no autenticado - mostrar pantallas de autenticación con animaciones
+        AnimatedScreenTransition(
+            targetScreen = currentScreen,
+            previousScreen = previousScreen
+        ) {
+            when (currentScreen) {
+                "login" -> LoginScreen(
+                    authViewModel = authViewModel,
+                    onLoginSuccess = {
+                        previousScreen = currentScreen
+                        currentScreen = "home"
+                    },
+                    onNavigateToRegister = { navigateToScreen("register") },
+                    onBackPressed = { navigateBack() }
+                )
+                "register" -> RegisterScreen(
+                    authViewModel = authViewModel,
+                    onRegisterSuccess = {
+                        previousScreen = currentScreen
+                        currentScreen = "home"
+                    },
+                    onNavigateToLogin = { navigateBack() },
+                    onBackPressed = { navigateBack() }
+                )
+                else -> {
+                    // Si por alguna razón está en otra pantalla sin estar autenticado, redirigir a login
+                    previousScreen = currentScreen
+                    currentScreen = "login"
+                }
             }
         }
     }
