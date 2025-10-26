@@ -10,6 +10,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.crimewave.ui.viewmodel.ClothingViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -24,7 +25,8 @@ fun ProfileScreen(
     onLogout: () -> Unit = {},
     userEmail: String = "",
     userPhone: String? = null,
-    isAdmin: Boolean = false
+    isAdmin: Boolean = false,
+    clothingViewModel: ClothingViewModel? = null
 ) {
     Scaffold(
         topBar = {
@@ -96,41 +98,16 @@ fun ProfileScreen(
                     ) {
                         if (isAdmin) {
                             // Métricas para administrador
+                            val productCount = clothingViewModel?.products?.value?.size ?: 0
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Text(
-                                    text = "48",
+                                    text = "$productCount",
                                     style = MaterialTheme.typography.headlineMedium,
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.primary
                                 )
                                 Text(
                                     text = "Productos",
-                                    style = MaterialTheme.typography.bodySmall
-                                )
-                            }
-
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Text(
-                                    text = "125",
-                                    style = MaterialTheme.typography.headlineMedium,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.primary
-                                )
-                                Text(
-                                    text = "Ventas",
-                                    style = MaterialTheme.typography.bodySmall
-                                )
-                            }
-
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Text(
-                                    text = "$3,850",
-                                    style = MaterialTheme.typography.headlineMedium,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.primary
-                                )
-                                Text(
-                                    text = "Ingresos",
                                     style = MaterialTheme.typography.bodySmall
                                 )
                             }

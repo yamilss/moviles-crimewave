@@ -137,7 +137,7 @@ fun OrderSuccessScreen(
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Text(text = "Número de Pedido:", fontWeight = FontWeight.Medium)
-                            Text(text = order.id)
+                            Text(text = "ORDEN N-12345")
                         }
 
                         Row(

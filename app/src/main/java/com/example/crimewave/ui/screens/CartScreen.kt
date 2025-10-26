@@ -347,7 +347,7 @@ fun CartSummary(
                 )
             ) {
                 Text(
-                    text = "Proceder al Checkout",
+                    text = "Proceder al pago",
                     style = MaterialTheme.typography.titleMedium
                 )
             }

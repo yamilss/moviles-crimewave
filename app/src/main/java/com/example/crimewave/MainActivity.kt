@@ -153,7 +153,8 @@ fun CrimewaveApp(
                 },
                 userEmail = currentUser?.email ?: "",
                 userPhone = currentUser?.phoneNumber,
-                isAdmin = currentUser?.isAdmin ?: false
+                isAdmin = currentUser?.isAdmin ?: false,
+                clothingViewModel = clothingViewModel
             )
             "settings" -> SettingsScreen(
                 onNavigateBack = { navigateBack() }
@@ -165,7 +166,8 @@ fun CrimewaveApp(
                         itemId = selectedItemId,
                         clothingViewModel = clothingViewModel,
                         cartViewModel = cartViewModel,
-                        onNavigateBack = { navigateBack() }
+                        onNavigateBack = { navigateBack() },
+                        onNavigateToCart = { navigateToScreen("cart") }
                     )
                 } else {
                     // Si no hay id válido, regresar a home

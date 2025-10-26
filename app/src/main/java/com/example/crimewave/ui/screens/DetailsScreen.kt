@@ -6,7 +6,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -28,7 +27,8 @@ fun DetailsScreen(
     itemId: String,
     clothingViewModel: ClothingViewModel,
     cartViewModel: CartViewModel,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onNavigateToCart: () -> Unit
 ) {
     // Obtener el producto real del ViewModel
     val products by clothingViewModel.products
@@ -103,7 +103,7 @@ fun DetailsScreen(
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Text(
-                        text = "Precio: ${String.format(java.util.Locale.forLanguageTag("es-CL"), "$%.2f CLP", selectedProduct.price)}",
+                        text = "Envíos gratis en todo 🇨🇱 en compras sobre 50k ",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -258,16 +258,16 @@ fun DetailsScreen(
                     Spacer(modifier = Modifier.height(8.dp))
 
                     OutlinedButton(
-                        onClick = { /* Agregar a favoritos */ },
+                        onClick = onNavigateToCart,
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Icon(
-                            Icons.Default.Favorite,
+                            Icons.Default.ShoppingCart,
                             contentDescription = null,
                             modifier = Modifier.size(20.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Agregar a Favoritos")
+                        Text("Ver el Carrito")
                     }
                 }
             }

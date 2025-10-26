@@ -55,7 +55,6 @@ fun BillingAddressScreen(
     var pais by remember { mutableStateOf("Chile") }
     var region by remember { mutableStateOf("") }
     var celular by remember { mutableStateOf("") }
-    var rutDni by remember { mutableStateOf("") }
     var instagram by remember { mutableStateOf("") }
 
     var paisExpanded by remember { mutableStateOf(false) }
