@@ -620,9 +620,9 @@ fun ReportScreen(
                                 onClick = {
                                     // Simulamos selección de imagen predeterminada basada en categoría
                                     selectedImage = when (selectedCategory) {
-                                        ProductType.POLERAS -> "polera_default"
-                                        ProductType.POLERONES -> "poleron_default"
-                                        ProductType.CUADROS -> "cuadro_default"
+                                        ProductType.POLERAS -> "satorupolera"
+                                        ProductType.POLERONES -> "togahoodie"
+                                        ProductType.CUADROS -> "givencuadro"
                                     }
                                 },
                                 modifier = Modifier.padding(end = 12.dp),

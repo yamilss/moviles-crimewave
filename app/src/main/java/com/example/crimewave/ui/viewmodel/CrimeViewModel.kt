@@ -195,7 +195,14 @@ class ClothingViewModel : ViewModel() {
     }
 
     fun addProduct(product: ClothingItem) {
-        _products.value = _products.value + product
+        // Si el producto tiene imagen por defecto, asignar la imagen predeterminada según la categoría
+        val productWithImage = if (product.imageUrl == "default_product") {
+            product.copy(imageUrl = getDefaultImageForCategory(product.category))
+        } else {
+            product
+        }
+
+        _products.value = _products.value + productWithImage
         loadFeaturedProducts() // Actualizar productos destacados
     }
 
@@ -214,5 +221,14 @@ class ClothingViewModel : ViewModel() {
     fun generateNextProductId(): String {
         val maxId = _products.value.mapNotNull { it.id.toIntOrNull() }.maxOrNull() ?: 0
         return (maxId + 1).toString()
+    }
+
+    // Función para obtener imagen predeterminada según la categoría
+    fun getDefaultImageForCategory(category: ProductType): String {
+        return when (category) {
+            ProductType.POLERAS -> "satorupolera"
+            ProductType.POLERONES -> "togahoodie"
+            ProductType.CUADROS -> "givencuadro"
+        }
     }
 }

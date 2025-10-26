@@ -1,40 +1,49 @@
 package com.example.crimewave.ui.screens
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.crimewave.data.model.ClothingItem
 import com.example.crimewave.data.model.ProductType
+import com.example.crimewave.ui.viewmodel.ClothingViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetailsScreen(
     itemId: String,
+    clothingViewModel: ClothingViewModel,
     onNavigateBack: () -> Unit
 ) {
-    // Producto de ejemplo basado en el ID
-    val sampleProduct = remember {
-        ClothingItem(
+    // Obtener el producto real del ViewModel
+    val products by clothingViewModel.products
+    val selectedProduct = remember(itemId, products) {
+        products.find { it.id == itemId } ?: ClothingItem(
             id = itemId,
-            name = "Polera Satoru Gojo",
-            description = "Diseño exclusivo de araña con estilo anime. Fabricada en algodón 100% premium con diseño de alta calidad que no se desvanece.",
-            price = 22.000,
-            imageUrl = "producto_gojo",
+            name = "Producto no encontrado",
+            description = "No se pudo encontrar el producto solicitado.",
+            price = 0.0,
+            imageUrl = "default_product",
             category = ProductType.POLERAS,
-            isNew = true,
-            sizes = listOf("S", "M", "L", "XL"),
-            colors = listOf("Negro", "Blanco", "Gris"),
-            stock = 15,
-            rating = 4.8f,
-            reviewCount = 24
+            isNew = false,
+            sizes = listOf("N/A"),
+            colors = listOf("N/A"),
+            stock = 0,
+            rating = 0.0f,
+            reviewCount = 0
         )
     }
 
@@ -57,6 +66,9 @@ fun DetailsScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            // Imagen del producto
+            ProductImage(imageUrl = selectedProduct.imageUrl)
+
             // Información principal del producto
             Card {
                 Column(
@@ -67,11 +79,11 @@ fun DetailsScreen(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(
-                            text = sampleProduct.name,
+                            text = selectedProduct.name,
                             style = MaterialTheme.typography.headlineSmall,
                             fontWeight = FontWeight.Bold
                         )
-                        if (sampleProduct.isNew) {
+                        if (selectedProduct.isNew) {
                             NewBadge()
                         }
                     }
@@ -79,7 +91,7 @@ fun DetailsScreen(
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Text(
-                        text = "SKU: ${sampleProduct.id}",
+                        text = "SKU: ${selectedProduct.id}",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -87,7 +99,7 @@ fun DetailsScreen(
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Text(
-                        text = "$${sampleProduct.price}",
+                        text = "$${String.format("%,.0f", selectedProduct.price)} CLP",
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary
@@ -108,7 +120,7 @@ fun DetailsScreen(
                     )
 
                     Text(
-                        text = sampleProduct.description,
+                        text = selectedProduct.description,
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
@@ -126,11 +138,11 @@ fun DetailsScreen(
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
 
-                    ProductInfoRow("Categoría", getCategoryText(sampleProduct.category))
-                    ProductInfoRow("Tallas", sampleProduct.sizes.joinToString(", "))
-                    ProductInfoRow("Colores", sampleProduct.colors.joinToString(", "))
-                    ProductInfoRow("Stock", "${sampleProduct.stock} unidades")
-                    ProductInfoRow("Rating", "⭐ ${sampleProduct.rating} (${sampleProduct.reviewCount} reseñas)")
+                    ProductInfoRow("Categoría", getCategoryText(selectedProduct.category))
+                    ProductInfoRow("Tallas", selectedProduct.sizes.joinToString(", "))
+                    ProductInfoRow("Colores", selectedProduct.colors.joinToString(", "))
+                    ProductInfoRow("Stock", "${selectedProduct.stock} unidades")
+                    ProductInfoRow("Rating", "⭐ ${selectedProduct.rating} (${selectedProduct.reviewCount} reseñas)")
                 }
             }
 
@@ -221,3 +233,40 @@ private fun getCategoryText(category: ProductType): String {
         ProductType.CUADROS -> "🖼️ Cuadros"
     }
 }
+
+@Composable
+private fun ProductImage(imageUrl: String) {
+    val imageResId = getImageResource(imageUrl)
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(300.dp),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+    ) {
+        Image(
+            painter = painterResource(id = imageResId),
+            contentDescription = "Imagen del producto",
+            modifier = Modifier
+                .fillMaxSize()
+                .clip(RoundedCornerShape(16.dp)),
+            contentScale = ContentScale.Crop
+        )
+    }
+}
+
+private fun getImageResource(imageUrl: String): Int {
+    return when (imageUrl) {
+        "satorupolera" -> com.example.crimewave.R.drawable.satorupolera
+        "togahoodie" -> com.example.crimewave.R.drawable.togahoodie
+        "givencuadro" -> com.example.crimewave.R.drawable.givencuadro
+        "polerongojo" -> com.example.crimewave.R.drawable.polerongojo
+        "logocrimewave" -> com.example.crimewave.R.drawable.logocrimewave
+        "bolsaanime" -> com.example.crimewave.R.drawable.bolsaanime
+        "makima" -> com.example.crimewave.R.drawable.makima
+        "power" -> com.example.crimewave.R.drawable.power
+        else -> com.example.crimewave.R.drawable.satorupolera // imagen por defecto
+    }
+}
+

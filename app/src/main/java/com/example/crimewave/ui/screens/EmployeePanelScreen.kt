@@ -256,7 +256,7 @@ private fun ProductManagementItem(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
-                    text = "$${product.price} • Stock: ${product.stock}",
+                    text = "$${String.format("%,.0f", product.price)} CLP • Stock: ${product.stock}",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.primary
                 )

@@ -78,6 +78,7 @@ fun CrimewaveApp() {
             )
             "details" -> DetailsScreen(
                 itemId = selectedItemId,
+                clothingViewModel = clothingViewModel,
                 onNavigateBack = { currentScreen = "home" }
             )
             "report" -> ReportScreen(

@@ -67,7 +67,7 @@ fun ProductCard(
                 )
 
                 Text(
-                    text = "$${product.price}",
+                    text = "$${String.format("%,.0f", product.price)} CLP",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary

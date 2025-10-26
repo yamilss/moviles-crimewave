@@ -17,6 +17,12 @@ class AuthViewModel : ViewModel() {
                 email = "admin",
                 password = "admin",
                 isAdmin = true
+            ),
+            User(
+                email = "hola@gmail.com",
+                password = "hola",
+                phoneNumber = "987654321",
+                isAdmin = false
             )
         )
     )
