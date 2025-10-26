@@ -1,7 +1,6 @@
 package com.example.crimewave.ui.screens
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -11,12 +10,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -44,6 +41,20 @@ fun ReportScreen(
     var sizeExpanded by remember { mutableStateOf(false) }
     var sizeQuantity by remember { mutableStateOf("1") }
     var selectedSizes by remember { mutableStateOf(mutableMapOf<String, Int>()) }
+
+    // Listas de tallas/medidas según la categoría
+    val availableOptions = remember(selectedCategory) {
+        when (selectedCategory) {
+            ProductType.CUADROS -> listOf("30x39", "40x50", "50x70", "70x81")
+            else -> listOf("XS", "S", "M", "L", "XL", "XXL")
+        }
+    }
+
+    // Resetear selección cuando cambia la categoría
+    LaunchedEffect(selectedCategory) {
+        selectedSizes.clear()
+        selectedSize = availableOptions.first()
+    }
     var selectedImage by remember { mutableStateOf<String?>(null) }
 
     // Validaciones
@@ -75,7 +86,7 @@ fun ReportScreen(
                         )
                     )
                 )
-                .padding(16.dp)
+                .padding(start = 16.dp, end = 16.dp, top = 48.dp, bottom = 16.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -205,7 +216,9 @@ fun ReportScreen(
                                 focusedBorderColor = Color(0xFF2196F3),
                                 unfocusedBorderColor = Color.Gray.copy(alpha = 0.3f),
                                 focusedContainerColor = Color.White,
-                                unfocusedContainerColor = Color.White
+                                unfocusedContainerColor = Color.White,
+                                focusedTextColor = Color.Black,
+                                unfocusedTextColor = Color.Black
                             )
                         )
                     }
@@ -253,7 +266,9 @@ fun ReportScreen(
                                 focusedBorderColor = if (isValidPrice || price.isEmpty()) Color(0xFF2196F3) else MaterialTheme.colorScheme.error,
                                 unfocusedBorderColor = if (isValidPrice || price.isEmpty()) Color.Gray.copy(alpha = 0.3f) else MaterialTheme.colorScheme.error,
                                 focusedContainerColor = Color.White,
-                                unfocusedContainerColor = Color.White
+                                unfocusedContainerColor = Color.White,
+                                focusedTextColor = Color.Black,
+                                unfocusedTextColor = Color.Black
                             )
                         )
                     }
@@ -308,7 +323,9 @@ fun ReportScreen(
                                     focusedBorderColor = Color(0xFF2196F3),
                                     unfocusedBorderColor = Color.Gray.copy(alpha = 0.3f),
                                     focusedContainerColor = Color.White,
-                                    unfocusedContainerColor = Color.White
+                                    unfocusedContainerColor = Color.White,
+                                    focusedTextColor = Color.Black,
+                                    unfocusedTextColor = Color.Black
                                 )
                             )
 
@@ -377,7 +394,9 @@ fun ReportScreen(
                                 focusedBorderColor = if (isValidStock || stock.isEmpty()) Color(0xFF2196F3) else MaterialTheme.colorScheme.error,
                                 unfocusedBorderColor = if (isValidStock || stock.isEmpty()) Color.Gray.copy(alpha = 0.3f) else MaterialTheme.colorScheme.error,
                                 focusedContainerColor = Color.White,
-                                unfocusedContainerColor = Color.White
+                                unfocusedContainerColor = Color.White,
+                                focusedTextColor = Color.Black,
+                                unfocusedTextColor = Color.Black
                             )
                         )
                     }
@@ -422,7 +441,9 @@ fun ReportScreen(
                             focusedBorderColor = Color(0xFF2196F3),
                             unfocusedBorderColor = Color.Gray.copy(alpha = 0.3f),
                             focusedContainerColor = Color.White,
-                            unfocusedContainerColor = Color.White
+                            unfocusedContainerColor = Color.White,
+                            focusedTextColor = Color.Black,
+                            unfocusedTextColor = Color.Black
                         )
                     )
                 }
@@ -441,7 +462,7 @@ fun ReportScreen(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Tallas y Cantidades",
+                        text = if (selectedCategory == ProductType.CUADROS) "Medidas y Cantidades" else "Tallas y Cantidades",
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Medium,
                         color = Color(0xFF424242)
@@ -463,18 +484,24 @@ fun ReportScreen(
                         ExposedDropdownMenuBox(
                             expanded = sizeExpanded,
                             onExpandedChange = { sizeExpanded = !sizeExpanded },
-                            modifier = Modifier.width(80.dp)
+                            modifier = Modifier
+                                .width(80.dp)
+                                .height(56.dp)
                         ) {
                             OutlinedTextField(
                                 value = selectedSize,
                                 onValueChange = {},
                                 readOnly = true,
                                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = sizeExpanded) },
-                                modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable),
+                                modifier = Modifier
+                                    .menuAnchor(MenuAnchorType.PrimaryNotEditable)
+                                    .fillMaxSize(),
                                 singleLine = true,
                                 colors = OutlinedTextFieldDefaults.colors(
                                     focusedBorderColor = Color(0xFF2196F3),
-                                    unfocusedBorderColor = Color.Gray.copy(alpha = 0.3f)
+                                    unfocusedBorderColor = Color.Gray.copy(alpha = 0.3f),
+                                    focusedTextColor = Color.Black,
+                                    unfocusedTextColor = Color.Black
                                 )
                             )
 
@@ -482,11 +509,11 @@ fun ReportScreen(
                                 expanded = sizeExpanded,
                                 onDismissRequest = { sizeExpanded = false }
                             ) {
-                                listOf("XS", "S", "M", "L", "XL", "XXL").forEach { size ->
+                                availableOptions.forEach { option ->
                                     DropdownMenuItem(
-                                        text = { Text(size) },
+                                        text = { Text(option) },
                                         onClick = {
-                                            selectedSize = size
+                                            selectedSize = option
                                             sizeExpanded = false
                                         }
                                     )
@@ -504,14 +531,18 @@ fun ReportScreen(
                                     sizeQuantity = newQuantity
                                 }
                             },
-                            modifier = Modifier.width(120.dp),
+                            modifier = Modifier
+                                .width(100.dp)
+                                .height(56.dp),
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                             singleLine = true,
                             isError = sizeQuantity.isNotEmpty() && !isValidSizeQuantity,
                             placeholder = { Text("1", color = Color.Gray.copy(alpha = 0.6f)) },
                             colors = OutlinedTextFieldDefaults.colors(
                                 focusedBorderColor = if (isValidSizeQuantity || sizeQuantity.isEmpty()) Color(0xFF2196F3) else MaterialTheme.colorScheme.error,
-                                unfocusedBorderColor = if (isValidSizeQuantity || sizeQuantity.isEmpty()) Color.Gray.copy(alpha = 0.3f) else MaterialTheme.colorScheme.error
+                                unfocusedBorderColor = if (isValidSizeQuantity || sizeQuantity.isEmpty()) Color.Gray.copy(alpha = 0.3f) else MaterialTheme.colorScheme.error,
+                                focusedTextColor = Color.Black,
+                                unfocusedTextColor = Color.Black
                             )
                         )
 
@@ -526,13 +557,21 @@ fun ReportScreen(
                                 }
                             },
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xFF2196F3)
+                                containerColor = Color(0xFF4CAF50)
                             ),
-                            shape = RoundedCornerShape(50),
-                            modifier = Modifier.size(48.dp),
-                            enabled = isValidSizeQuantity && selectedSize.isNotEmpty()
+                            shape = RoundedCornerShape(8.dp),
+                            modifier = Modifier
+                                .height(56.dp)
+                                .width(56.dp),
+                            enabled = isValidSizeQuantity && selectedSize.isNotEmpty(),
+                            elevation = ButtonDefaults.buttonElevation(defaultElevation = 3.dp)
                         ) {
-                            Text("+", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                            Icon(
+                                Icons.Default.Add,
+                                contentDescription = "Agregar",
+                                tint = Color.White,
+                                modifier = Modifier.size(28.dp)
+                            )
                         }
                     }
 
@@ -540,7 +579,7 @@ fun ReportScreen(
                     if (selectedSizes.isNotEmpty()) {
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "Tallas agregadas:",
+                            text = if (selectedCategory == ProductType.CUADROS) "Medidas agregadas:" else "Tallas agregadas:",
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Medium,
                             color = Color(0xFF424242)
@@ -673,11 +712,14 @@ fun ReportScreen(
             // Botones de acción
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 OutlinedButton(
                     onClick = onNavigateBack,
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(56.dp),
                     colors = ButtonDefaults.outlinedButtonColors(
                         contentColor = Color(0xFF616161)
                     ),
@@ -702,6 +744,7 @@ fun ReportScreen(
                             category = selectedCategory,
                             isNew = true,
                             isFeatured = false,
+                            sizes = if (selectedSizes.isNotEmpty()) selectedSizes.keys.toList() else availableOptions.take(1),
                             stock = stock.toIntOrNull() ?: 10
                         )
 
@@ -709,7 +752,9 @@ fun ReportScreen(
                         clothingViewModel.addProduct(newProduct)
                         onReportSubmitted()
                     },
-                    modifier = Modifier.weight(2f),
+                    modifier = Modifier
+                        .height(56.dp)
+                        .width(100.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color(0xFF2196F3)
                     ),
@@ -723,12 +768,10 @@ fun ReportScreen(
                 ) {
                     Icon(
                         Icons.Default.Add,
-                        contentDescription = null,
+                        contentDescription = "Agregar Producto",
                         tint = Color.White,
-                        modifier = Modifier.size(18.dp)
+                        modifier = Modifier.size(32.dp)
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("AGREGAR PRODUCTO", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 14.sp)
                 }
             }
 

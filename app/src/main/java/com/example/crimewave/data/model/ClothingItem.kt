@@ -11,9 +11,7 @@ data class ClothingItem(
     val isFeatured: Boolean = false,
     val specialOffer: String? = null,
     val sizes: List<String> = listOf("S", "M", "L", "XL"),
-    val colors: List<String> = listOf("Negro", "Blanco", "Gris"),
     val stock: Int = 10,
-    val rating: Float = 4.5f,
     val reviewCount: Int = 0
 )
 

@@ -36,71 +36,32 @@ class ClothingViewModel : ViewModel() {
         _products.value = listOf(
             ClothingItem(
                 id = "1",
-                name = "Polera Araña",
-                description = "Diseño exclusivo de araña con estilo anime",
-                price = 25.99,
-                imageUrl = "producto_arana",
+                name = "Polera Satoru Gojo",
+                description = "Diseño original de Satoru Gojo del anime Jujutsu Kaisen",
+                price = 22000.0,
+                imageUrl = "satorupolera",
                 category = ProductType.POLERAS,
                 isNew = true
             ),
             ClothingItem(
                 id = "2",
-                name = "Polera Original",
-                description = "2 por $35 - Poleras básicas de alta calidad",
-                price = 17.50,
-                imageUrl = "producto_original",
-                category = ProductType.POLERAS,
-                isNew = false,
-                specialOffer = "2 x $35"
-            ),
-            ClothingItem(
-                id = "3",
-                name = "Cuadro Anime",
-                description = "Cuadros decorativos con diseños de anime",
-                price = 45.00,
-                imageUrl = "producto_cuadros",
-                category = ProductType.CUADROS,
-                isNew = true
-            ),
-
-            ClothingItem(
-                id = "5",
-                name = "Polera Satoru",
-                description = "Diseño premium de Satoru Gojo",
-                price = 29.99,
-                imageUrl = "producto_satoru",
-                category = ProductType.POLERAS,
-                isNew = true,
-                isFeatured = true
-            ),
-            ClothingItem(
-                id = "6",
-                name = "Polerón Anime",
-                description = "Polerón con diseños anime exclusivos",
-                price = 42.00,
-                imageUrl = "producto_poleron",
+                name = "Polerón Toga Himiko",
+                description = "Polerón con diseño de Himiko Toga del anime My Hero Academia",
+                price = 42000.0,
+                imageUrl = "togahoodie",
                 category = ProductType.POLERONES,
                 isNew = true,
                 isFeatured = true
             ),
             ClothingItem(
-                id = "7",
-                name = "Polera Anime Collection",
-                description = "Colección especial de anime",
-                price = 27.50,
-                imageUrl = "polera_anime",
-                category = ProductType.POLERAS,
-                isNew = true
-            ),
-            ClothingItem(
-                id = "8",
-                name = "Jujutsu Kaisen Special",
-                description = "Diseño exclusivo de Jujutsu Kaisen",
-                price = 32.00,
-                imageUrl = "jjk_product",
-                category = ProductType.POLERAS,
+                id = "3",
+                name = "Cuadro Given",
+                description = "Cuadro decorativo minimalista con diseño del anime Given",
+                price = 45000.0,
+                imageUrl = "givencuadro",
+                category = ProductType.CUADROS,
                 isNew = true,
-                isFeatured = true
+                sizes = listOf("30x39", "40x50", "50x70", "70x81")
             )
         )
     }
@@ -163,6 +124,11 @@ class ClothingViewModel : ViewModel() {
     }
 
     fun addToCart(product: ClothingItem) {
+        // Validar que el producto tenga stock disponible
+        if (product.stock <= 0) {
+            throw IllegalArgumentException("No hay stock disponible para este producto")
+        }
+
         _cartItems.value = _cartItems.value + product
     }
 
@@ -195,6 +161,9 @@ class ClothingViewModel : ViewModel() {
     }
 
     fun addProduct(product: ClothingItem) {
+        // Validar el producto antes de agregarlo
+        validateProduct(product)
+
         // Si el producto tiene imagen por defecto, asignar la imagen predeterminada según la categoría
         val productWithImage = if (product.imageUrl == "default_product") {
             product.copy(imageUrl = getDefaultImageForCategory(product.category))
@@ -212,6 +181,9 @@ class ClothingViewModel : ViewModel() {
     }
 
     fun updateProduct(updatedProduct: ClothingItem) {
+        // Validar el producto antes de actualizarlo
+        validateProduct(updatedProduct)
+
         _products.value = _products.value.map { product ->
             if (product.id == updatedProduct.id) updatedProduct else product
         }
@@ -229,6 +201,39 @@ class ClothingViewModel : ViewModel() {
             ProductType.POLERAS -> "satorupolera"
             ProductType.POLERONES -> "togahoodie"
             ProductType.CUADROS -> "givencuadro"
+        }
+    }
+
+    // Función para validar productos antes de agregar o actualizar
+    private fun validateProduct(product: ClothingItem) {
+        // Validación de stock negativo
+        if (product.stock < 0) {
+            throw IllegalArgumentException("El stock no puede ser negativo. Stock actual: ${product.stock}")
+        }
+
+        // Validación de precio negativo
+        if (product.price < 0.0) {
+            throw IllegalArgumentException("El precio no puede ser negativo. Precio actual: $${String.format("%.0f", product.price)}")
+        }
+
+        // Validación de precio mínimo (15,000 CLP)
+        if (product.price < 15000.0) {
+            throw IllegalArgumentException("El precio mínimo debe ser $15,000 CLP. Precio actual: $${String.format("%.0f", product.price)}")
+        }
+
+        // Validación de nombre no vacío
+        if (product.name.isBlank()) {
+            throw IllegalArgumentException("El nombre del producto no puede estar vacío")
+        }
+
+        // Validación de descripción no vacía
+        if (product.description.isBlank()) {
+            throw IllegalArgumentException("La descripción del producto no puede estar vacía")
+        }
+
+        // Validación de tallas/medidas para cuadros
+        if (product.category == ProductType.CUADROS && product.sizes.isEmpty()) {
+            throw IllegalArgumentException("Los cuadros deben tener al menos una medida especificada")
         }
     }
 }

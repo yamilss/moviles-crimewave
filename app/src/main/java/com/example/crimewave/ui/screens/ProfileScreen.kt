@@ -68,7 +68,7 @@ fun ProfileScreen(
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = "👤",
+                                text = "😢",
                                 style = MaterialTheme.typography.headlineLarge
                             )
                         }
@@ -77,7 +77,7 @@ fun ProfileScreen(
                     Spacer(modifier = Modifier.height(16.dp))
 
                     Text(
-                        text = if (isAdmin) "Admin Tienda Anime" else "Cliente",
+                        text = if (isAdmin) "Administrador" else "Cliente",
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold
                     )
@@ -138,7 +138,7 @@ fun ProfileScreen(
                             // Métricas para cliente
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Text(
-                                    text = "3",
+                                    text = "0",
                                     style = MaterialTheme.typography.headlineMedium,
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.primary
@@ -151,26 +151,13 @@ fun ProfileScreen(
 
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Text(
-                                    text = "2",
+                                    text = "0",
                                     style = MaterialTheme.typography.headlineMedium,
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.primary
                                 )
                                 Text(
                                     text = "Favoritos",
-                                    style = MaterialTheme.typography.bodySmall
-                                )
-                            }
-
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Text(
-                                    text = "$127",
-                                    style = MaterialTheme.typography.headlineMedium,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.primary
-                                )
-                                Text(
-                                    text = "Gastado",
                                     style = MaterialTheme.typography.bodySmall
                                 )
                             }

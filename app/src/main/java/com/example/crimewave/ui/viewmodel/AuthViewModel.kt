@@ -19,7 +19,7 @@ class AuthViewModel : ViewModel() {
                 isAdmin = true
             ),
             User(
-                email = "hola@gmail.com",
+                email = "hola",
                 password = "hola",
                 phoneNumber = "987654321",
                 isAdmin = false
@@ -139,6 +139,114 @@ class AuthViewModel : ViewModel() {
             error = null
         )
 
+        return true
+    }
+
+    fun saveShippingAddress(
+        nombre: String,
+        apellidos: String,
+        direccion: String,
+        rut: String,
+        ciudad: String,
+        codigoPostal: String,
+        pais: String,
+        region: String,
+        celular: String,
+        instagram: String
+    ): Boolean {
+        val currentUser = _authState.value.currentUser ?: return false
+
+        val shippingAddress = com.example.crimewave.data.model.ShippingAddress(
+            nombre = nombre,
+            apellidos = apellidos,
+            direccion = direccion,
+            rut = rut,
+            ciudad = ciudad,
+            codigoPostal = codigoPostal,
+            pais = pais,
+            region = region,
+            celular = celular,
+            instagram = instagram
+        )
+
+        val updatedUser = currentUser.copy(shippingAddress = shippingAddress)
+
+        // Actualizar en la lista de usuarios registrados
+        _registeredUsers.value = _registeredUsers.value.map { user ->
+            if (user.email == currentUser.email) updatedUser else user
+        }
+
+        // Actualizar el usuario actual en la sesión
+        _authState.value = _authState.value.copy(currentUser = updatedUser)
+
+        return true
+    }
+
+    fun saveBillingAddress(
+        nombre: String,
+        apellidos: String,
+        direccion: String,
+        rut: String,
+        ciudad: String,
+        codigoPostal: String,
+        pais: String,
+        region: String,
+        celular: String,
+        instagram: String
+    ): Boolean {
+        val currentUser = _authState.value.currentUser ?: return false
+
+        val billingAddress = com.example.crimewave.data.model.BillingAddress(
+            nombre = nombre,
+            apellidos = apellidos,
+            direccion = direccion,
+            rut = rut,
+            ciudad = ciudad,
+            codigoPostal = codigoPostal,
+            pais = pais,
+            region = region,
+            celular = celular,
+            instagram = instagram
+        )
+
+        val updatedUser = currentUser.copy(billingAddress = billingAddress)
+
+        // Actualizar en la lista de usuarios registrados
+        _registeredUsers.value = _registeredUsers.value.map { user ->
+            if (user.email == currentUser.email) updatedUser else user
+        }
+
+        // Actualizar el usuario actual en la sesión
+        _authState.value = _authState.value.copy(currentUser = updatedUser)
+
+        return true
+    }
+
+    fun deleteShippingAddress(): Boolean {
+        val currentUser = _authState.value.currentUser ?: return false
+        val updatedUser = currentUser.copy(shippingAddress = null)
+
+        // Actualizar en la lista de usuarios registrados
+        _registeredUsers.value = _registeredUsers.value.map { user ->
+            if (user.email == currentUser.email) updatedUser else user
+        }
+
+        // Actualizar el usuario actual en la sesión
+        _authState.value = _authState.value.copy(currentUser = updatedUser)
+        return true
+    }
+
+    fun deleteBillingAddress(): Boolean {
+        val currentUser = _authState.value.currentUser ?: return false
+        val updatedUser = currentUser.copy(billingAddress = null)
+
+        // Actualizar en la lista de usuarios registrados
+        _registeredUsers.value = _registeredUsers.value.map { user ->
+            if (user.email == currentUser.email) updatedUser else user
+        }
+
+        // Actualizar el usuario actual en la sesión
+        _authState.value = _authState.value.copy(currentUser = updatedUser)
         return true
     }
 }

@@ -10,6 +10,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.crimewave.data.model.ClothingItem
@@ -25,7 +26,8 @@ fun HomeScreen(
     clothingViewModel: ClothingViewModel,
     onNavigateToProfile: () -> Unit,
     onNavigateToDetails: (String) -> Unit,
-    onNavigateToReport: () -> Unit
+    onNavigateToReport: () -> Unit,
+    isAdmin: Boolean = false
 ) {
     // Obtener productos del ViewModel
     val allProducts by clothingViewModel.products
@@ -43,10 +45,12 @@ fun HomeScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = onNavigateToReport
-            ) {
-                Icon(Icons.Default.Add, contentDescription = "Agregar Producto")
+            if (isAdmin) {
+                FloatingActionButton(
+                    onClick = onNavigateToReport
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = "Agregar Producto")
+                }
             }
         }
     ) { innerPadding ->

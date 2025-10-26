@@ -17,6 +17,8 @@ import com.example.crimewave.ui.screens.RegisterScreen
 import com.example.crimewave.ui.screens.EditDetailsScreen
 import com.example.crimewave.ui.screens.ShippingAddressScreen
 import com.example.crimewave.ui.screens.BillingAddressScreen
+import com.example.crimewave.ui.screens.ViewShippingAddressScreen
+import com.example.crimewave.ui.screens.ViewBillingAddressScreen
 import com.example.crimewave.ui.viewmodel.ClothingViewModel
 import com.example.crimewave.ui.viewmodel.AuthViewModel
 import com.example.crimewave.ui.theme.CrimewaveTheme
@@ -55,7 +57,8 @@ fun CrimewaveApp() {
                     selectedItemId = itemId
                     currentScreen = "details"
                 },
-                onNavigateToReport = { currentScreen = "report" }
+                onNavigateToReport = { currentScreen = "report" },
+                isAdmin = authState.currentUser?.isAdmin ?: false
             )
             "profile" -> ProfileScreen(
                 onNavigateBack = { currentScreen = "home" },
@@ -63,8 +66,8 @@ fun CrimewaveApp() {
                 onNavigateToStats = { currentScreen = "stats" },
                 onNavigateToEditDetails = { currentScreen = "editDetails" },
                 onNavigateToReport = { currentScreen = "report" },
-                onNavigateToShippingAddress = { currentScreen = "shippingAddress" },
-                onNavigateToBillingAddress = { currentScreen = "billingAddress" },
+                onNavigateToShippingAddress = { currentScreen = "viewShippingAddress" },
+                onNavigateToBillingAddress = { currentScreen = "viewBillingAddress" },
                 onLogout = {
                     authViewModel.logout()
                     currentScreen = "login"
@@ -100,11 +103,23 @@ fun CrimewaveApp() {
                 currentEmail = authState.currentUser?.email ?: "",
                 currentPhone = authState.currentUser?.phoneNumber
             )
+            "viewShippingAddress" -> ViewShippingAddressScreen(
+                onNavigateBack = { currentScreen = "profile" },
+                onNavigateToAdd = { currentScreen = "shippingAddress" },
+                authViewModel = authViewModel
+            )
+            "viewBillingAddress" -> ViewBillingAddressScreen(
+                onNavigateBack = { currentScreen = "profile" },
+                onNavigateToAdd = { currentScreen = "billingAddress" },
+                authViewModel = authViewModel
+            )
             "shippingAddress" -> ShippingAddressScreen(
-                onNavigateBack = { currentScreen = "profile" }
+                onNavigateBack = { currentScreen = "viewShippingAddress" },
+                authViewModel = authViewModel
             )
             "billingAddress" -> BillingAddressScreen(
-                onNavigateBack = { currentScreen = "profile" }
+                onNavigateBack = { currentScreen = "viewBillingAddress" },
+                authViewModel = authViewModel
             )
         }
     } else {

@@ -24,7 +24,8 @@ private fun validateCelular(celular: String): Boolean {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ShippingAddressScreen(
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    authViewModel: com.example.crimewave.ui.viewmodel.AuthViewModel
 ) {
     var nombre by remember { mutableStateOf("") }
     var apellidos by remember { mutableStateOf("") }
@@ -40,9 +41,28 @@ fun ShippingAddressScreen(
 
     var paisExpanded by remember { mutableStateOf(false) }
     var regionExpanded by remember { mutableStateOf(false) }
+    var showSuccessDialog by remember { mutableStateOf(false) }
 
     // Validación para celular
     val isValidCelular = celular.isEmpty() || validateCelular(celular)
+
+    val authState by authViewModel.authState
+
+    // Cargar datos existentes si los hay
+    LaunchedEffect(authState.currentUser?.shippingAddress) {
+        authState.currentUser?.shippingAddress?.let { address ->
+            nombre = address.nombre
+            apellidos = address.apellidos
+            direccion = address.direccion
+            rut = address.rut
+            ciudad = address.ciudad
+            codigoPostal = address.codigoPostal
+            pais = address.pais
+            region = address.region
+            celular = address.celular
+            instagram = address.instagram
+        }
+    }
 
     val paises = listOf("Chile")
     val regiones = listOf(
@@ -74,7 +94,7 @@ fun ShippingAddressScreen(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(start = 16.dp, end = 16.dp, top = 48.dp, bottom = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(
@@ -442,8 +462,21 @@ fun ShippingAddressScreen(
                 // Botón Confirmar
                 Button(
                     onClick = {
-                        // Aquí se guardaría la dirección
-                        onNavigateBack()
+                        val success = authViewModel.saveShippingAddress(
+                            nombre = nombre,
+                            apellidos = apellidos,
+                            direccion = direccion,
+                            rut = rut,
+                            ciudad = ciudad,
+                            codigoPostal = codigoPostal,
+                            pais = pais,
+                            region = region,
+                            celular = celular,
+                            instagram = instagram
+                        )
+                        if (success) {
+                            showSuccessDialog = true
+                        }
                     },
                     modifier = Modifier.weight(2f),
                     colors = ButtonDefaults.buttonColors(
@@ -472,5 +505,37 @@ fun ShippingAddressScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
         }
+    }
+
+    // Diálogo de éxito
+    if (showSuccessDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                showSuccessDialog = false
+                onNavigateBack()
+            },
+            title = { Text("✅ Dirección Guardada") },
+            text = {
+                Column {
+                    Text("La dirección de envío se ha guardado correctamente.")
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text("Detalles guardados:", fontWeight = FontWeight.Bold)
+                    Text("• $nombre $apellidos")
+                    Text("• $direccion")
+                    Text("• $ciudad, $region")
+                    if (celular.isNotEmpty()) Text("• Teléfono: $celular")
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showSuccessDialog = false
+                        onNavigateBack()
+                    }
+                ) {
+                    Text("Aceptar")
+                }
+            }
+        )
     }
 }

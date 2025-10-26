@@ -2,7 +2,9 @@ package com.example.crimewave.ui.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Favorite
@@ -40,9 +42,7 @@ fun DetailsScreen(
             category = ProductType.POLERAS,
             isNew = false,
             sizes = listOf("N/A"),
-            colors = listOf("N/A"),
             stock = 0,
-            rating = 0.0f,
             reviewCount = 0
         )
     }
@@ -63,7 +63,8 @@ fun DetailsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(16.dp),
+                .padding(16.dp)
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // Imagen del producto
@@ -139,10 +140,15 @@ fun DetailsScreen(
                     )
 
                     ProductInfoRow("Categoría", getCategoryText(selectedProduct.category))
-                    ProductInfoRow("Tallas", selectedProduct.sizes.joinToString(", "))
-                    ProductInfoRow("Colores", selectedProduct.colors.joinToString(", "))
+
+                    // Mostrar tallas o medidas según el tipo de producto
+                    if (selectedProduct.category == ProductType.CUADROS) {
+                        ProductInfoRow("Medidas", selectedProduct.sizes.joinToString(", "))
+                    } else {
+                        ProductInfoRow("Tallas", selectedProduct.sizes.joinToString(", "))
+                    }
+
                     ProductInfoRow("Stock", "${selectedProduct.stock} unidades")
-                    ProductInfoRow("Rating", "⭐ ${selectedProduct.rating} (${selectedProduct.reviewCount} reseñas)")
                 }
             }
 
