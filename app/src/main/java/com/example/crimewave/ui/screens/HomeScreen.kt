@@ -15,53 +15,26 @@ import androidx.compose.ui.unit.dp
 import com.example.crimewave.data.model.ClothingItem
 import com.example.crimewave.data.model.ProductType
 import com.example.crimewave.ui.components.ProductCard
+import com.example.crimewave.ui.viewmodel.ClothingViewModel
 import com.example.crimewave.R
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
+    clothingViewModel: ClothingViewModel,
     onNavigateToProfile: () -> Unit,
     onNavigateToDetails: (String) -> Unit,
     onNavigateToReport: () -> Unit
 ) {
-    // Productos destacados de ejemplo
-    val featuredProducts = remember {
-        listOf(
-            ClothingItem(
-                id = "1",
-                name = "Polera Araña",
-                description = "Diseño exclusivo de araña con estilo anime",
-                price = 25.99,
-                imageUrl = "producto_arana",
-                category = ProductType.POLERAS,
-                isNew = true
-            ),
-            ClothingItem(
-                id = "2",
-                name = "Polerón Anime",
-                description = "Polerón con diseños anime exclusivos",
-                price = 42.00,
-                imageUrl = "producto_poleron",
-                category = ProductType.POLERONES,
-                isFeatured = true
-            ),
-            ClothingItem(
-                id = "3",
-                name = "Cuadro Anime",
-                description = "Cuadros decorativos con diseños de anime",
-                price = 45.00,
-                imageUrl = "producto_cuadros",
-                category = ProductType.CUADROS,
-                isNew = true
-            )
-        )
-    }
+    // Obtener productos del ViewModel
+    val allProducts by clothingViewModel.products
+    val featuredProducts = allProducts.take(6) // Mostrar los primeros 6 productos
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Tienda Anime") },
+                title = { Text("Catálago") },
                 actions = {
                     IconButton(onClick = onNavigateToProfile) {
                         Icon(Icons.Default.Person, contentDescription = "Perfil")

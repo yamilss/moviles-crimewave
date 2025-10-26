@@ -102,4 +102,37 @@ class AuthViewModel : ViewModel() {
     fun clearError() {
         _authState.value = _authState.value.copy(error = null)
     }
+
+    fun updateUserDetails(
+        currentPassword: String,
+        newPhone: String?,
+        newPassword: String?
+    ): Boolean {
+        val currentUser = _authState.value.currentUser ?: return false
+
+        // Verificar contraseña actual
+        if (currentUser.password != currentPassword) {
+            _authState.value = _authState.value.copy(error = "Contraseña actual incorrecta")
+            return false
+        }
+
+        // Crear usuario actualizado
+        val updatedUser = currentUser.copy(
+            phoneNumber = newPhone?.takeIf { it.isNotBlank() } ?: currentUser.phoneNumber,
+            password = newPassword?.takeIf { it.isNotBlank() } ?: currentUser.password
+        )
+
+        // Actualizar en la lista de usuarios registrados
+        _registeredUsers.value = _registeredUsers.value.map { user ->
+            if (user.email == currentUser.email) updatedUser else user
+        }
+
+        // Actualizar el usuario actual en la sesión
+        _authState.value = _authState.value.copy(
+            currentUser = updatedUser,
+            error = null
+        )
+
+        return true
+    }
 }

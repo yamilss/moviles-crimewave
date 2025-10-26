@@ -193,4 +193,26 @@ class ClothingViewModel : ViewModel() {
             it.description.contains(query, ignoreCase = true)
         }
     }
+
+    fun addProduct(product: ClothingItem) {
+        _products.value = _products.value + product
+        loadFeaturedProducts() // Actualizar productos destacados
+    }
+
+    fun removeProduct(productId: String) {
+        _products.value = _products.value.filter { it.id != productId }
+        loadFeaturedProducts() // Actualizar productos destacados
+    }
+
+    fun updateProduct(updatedProduct: ClothingItem) {
+        _products.value = _products.value.map { product ->
+            if (product.id == updatedProduct.id) updatedProduct else product
+        }
+        loadFeaturedProducts() // Actualizar productos destacados
+    }
+
+    fun generateNextProductId(): String {
+        val maxId = _products.value.mapNotNull { it.id.toIntOrNull() }.maxOrNull() ?: 0
+        return (maxId + 1).toString()
+    }
 }

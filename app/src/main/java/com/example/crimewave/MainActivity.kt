@@ -11,9 +11,12 @@ import com.example.crimewave.ui.screens.ProfileScreen
 import com.example.crimewave.ui.screens.SettingsScreen
 import com.example.crimewave.ui.screens.DetailsScreen
 import com.example.crimewave.ui.screens.ReportScreen
-import com.example.crimewave.ui.screens.StatsScreen
+import com.example.crimewave.ui.screens.EmployeePanelScreen
 import com.example.crimewave.ui.screens.LoginScreen
 import com.example.crimewave.ui.screens.RegisterScreen
+import com.example.crimewave.ui.screens.EditDetailsScreen
+import com.example.crimewave.ui.screens.ShippingAddressScreen
+import com.example.crimewave.ui.screens.BillingAddressScreen
 import com.example.crimewave.ui.viewmodel.ClothingViewModel
 import com.example.crimewave.ui.viewmodel.AuthViewModel
 import com.example.crimewave.ui.theme.CrimewaveTheme
@@ -46,6 +49,7 @@ fun CrimewaveApp() {
         when (currentScreen) {
             "login", "register" -> currentScreen = "home" // Redirigir a home si ya está autenticado
             "home" -> HomeScreen(
+                clothingViewModel = clothingViewModel,
                 onNavigateToProfile = { currentScreen = "profile" },
                 onNavigateToDetails = { itemId ->
                     selectedItemId = itemId
@@ -57,10 +61,17 @@ fun CrimewaveApp() {
                 onNavigateBack = { currentScreen = "home" },
                 onNavigateToSettings = { currentScreen = "settings" },
                 onNavigateToStats = { currentScreen = "stats" },
+                onNavigateToEditDetails = { currentScreen = "editDetails" },
+                onNavigateToReport = { currentScreen = "report" },
+                onNavigateToShippingAddress = { currentScreen = "shippingAddress" },
+                onNavigateToBillingAddress = { currentScreen = "billingAddress" },
                 onLogout = {
                     authViewModel.logout()
                     currentScreen = "login"
-                }
+                },
+                userEmail = authState.currentUser?.email ?: "",
+                userPhone = authState.currentUser?.phoneNumber,
+                isAdmin = authState.currentUser?.isAdmin ?: false
             )
             "settings" -> SettingsScreen(
                 onNavigateBack = { currentScreen = "profile" }
@@ -70,12 +81,28 @@ fun CrimewaveApp() {
                 onNavigateBack = { currentScreen = "home" }
             )
             "report" -> ReportScreen(
+                clothingViewModel = clothingViewModel,
                 onNavigateBack = { currentScreen = "home" },
                 onReportSubmitted = {
                     currentScreen = "home"
                 }
             )
-            "stats" -> StatsScreen(
+            "stats" -> EmployeePanelScreen(
+                clothingViewModel = clothingViewModel,
+                onNavigateBack = { currentScreen = "profile" },
+                onNavigateToAddProduct = { currentScreen = "report" }
+            )
+            "editDetails" -> EditDetailsScreen(
+                authViewModel = authViewModel,
+                onNavigateBack = { currentScreen = "profile" },
+                onUpdateSuccess = { currentScreen = "profile" },
+                currentEmail = authState.currentUser?.email ?: "",
+                currentPhone = authState.currentUser?.phoneNumber
+            )
+            "shippingAddress" -> ShippingAddressScreen(
+                onNavigateBack = { currentScreen = "profile" }
+            )
+            "billingAddress" -> BillingAddressScreen(
                 onNavigateBack = { currentScreen = "profile" }
             )
         }

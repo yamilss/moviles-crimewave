@@ -17,7 +17,14 @@ fun ProfileScreen(
     onNavigateBack: () -> Unit,
     onNavigateToSettings: () -> Unit,
     onNavigateToStats: () -> Unit,
-    onLogout: () -> Unit = {}
+    onNavigateToEditDetails: () -> Unit = {},
+    onNavigateToReport: () -> Unit = {},
+    onNavigateToShippingAddress: () -> Unit = {},
+    onNavigateToBillingAddress: () -> Unit = {},
+    onLogout: () -> Unit = {},
+    userEmail: String = "",
+    userPhone: String? = null,
+    isAdmin: Boolean = false
 ) {
     Scaffold(
         topBar = {
@@ -70,13 +77,13 @@ fun ProfileScreen(
                     Spacer(modifier = Modifier.height(16.dp))
 
                     Text(
-                        text = "Admin Tienda Anime",
+                        text = if (isAdmin) "Admin Tienda Anime" else "Cliente",
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold
                     )
 
                     Text(
-                        text = "admin@tiendaanime.com",
+                        text = userEmail.ifEmpty { "No especificado" },
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -87,43 +94,86 @@ fun ProfileScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(
-                                text = "48",
-                                style = MaterialTheme.typography.headlineMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                            Text(
-                                text = "Productos",
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                        }
+                        if (isAdmin) {
+                            // Métricas para administrador
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text(
+                                    text = "48",
+                                    style = MaterialTheme.typography.headlineMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                                Text(
+                                    text = "Productos",
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            }
 
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(
-                                text = "150",
-                                style = MaterialTheme.typography.headlineMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                            Text(
-                                text = "Ventas",
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                        }
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text(
+                                    text = "125",
+                                    style = MaterialTheme.typography.headlineMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                                Text(
+                                    text = "Ventas",
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            }
 
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(
-                                text = "$3,850",
-                                style = MaterialTheme.typography.headlineMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                            Text(
-                                text = "Ingresos",
-                                style = MaterialTheme.typography.bodySmall
-                            )
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text(
+                                    text = "$3,850",
+                                    style = MaterialTheme.typography.headlineMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                                Text(
+                                    text = "Ingresos",
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            }
+                        } else {
+                            // Métricas para cliente
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text(
+                                    text = "3",
+                                    style = MaterialTheme.typography.headlineMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                                Text(
+                                    text = "Compras",
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            }
+
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text(
+                                    text = "2",
+                                    style = MaterialTheme.typography.headlineMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                                Text(
+                                    text = "Favoritos",
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            }
+
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text(
+                                    text = "$127",
+                                    style = MaterialTheme.typography.headlineMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                                Text(
+                                    text = "Gastado",
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            }
                         }
                     }
                 }
@@ -145,29 +195,65 @@ fun ProfileScreen(
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
 
+                    // Botón para editar detalles (disponible para todos los usuarios)
                     Button(
-                        onClick = { /* Agregar nuevo producto */ },
+                        onClick = onNavigateToEditDetails,
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text("Agregar Nuevo Producto")
+                        Text("Editar Mis Detalles")
                     }
 
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    OutlinedButton(
-                        onClick = { /* Ver inventario */ },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text("Ver Inventario")
+                    // Botones específicos para clientes
+                    if (!isAdmin) {
+                        OutlinedButton(
+                            onClick = onNavigateToShippingAddress,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text("Direcciones de Envío")
+                        }
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        OutlinedButton(
+                            onClick = onNavigateToBillingAddress,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text("Direcciones de Facturación")
+                        }
+
+                        Spacer(modifier = Modifier.height(8.dp))
                     }
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                    // Botones específicos para administrador
+                    if (isAdmin) {
+                        OutlinedButton(
+                            onClick = onNavigateToReport,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text("Agregar Nuevo Producto")
+                        }
 
-                    OutlinedButton(
-                        onClick = onNavigateToStats,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text("Ver Estadísticas")
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        OutlinedButton(
+                            onClick = { /* Ver inventario */ },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text("Ver Inventario")
+                        }
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        OutlinedButton(
+                            onClick = onNavigateToStats,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text("Panel de Empleados")
+                        }
+
+                        Spacer(modifier = Modifier.height(8.dp))
                     }
 
                     // Botón de cerrar sesión
