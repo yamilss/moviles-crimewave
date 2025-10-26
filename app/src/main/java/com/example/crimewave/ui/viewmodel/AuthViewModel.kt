@@ -186,6 +186,11 @@ class AuthViewModel : ViewModel() {
             return false
         }
 
+        // Validar RUT (exactamente 9 dígitos numéricos, igual que el celular)
+        if (rut.length != 9 || !rut.all { it.isDigit() }) {
+            _authState.value = _authState.value.copy(error = "El RUT debe tener exactamente 9 dígitos")
+            return false
+        }
 
         val shippingAddress = com.example.crimewave.data.model.ShippingAddress(
             nombre = nombre,
@@ -241,19 +246,13 @@ class AuthViewModel : ViewModel() {
             return false
         }
 
-        // Validar RUT de 9 dígitos
+        // Validar RUT (exactamente 9 dígitos numéricos, igual que el celular)
         if (rut.length != 9 || !rut.all { it.isDigit() }) {
             _authState.value = _authState.value.copy(error = "El RUT debe tener exactamente 9 dígitos")
             return false
         }
 
         val billingAddress = com.example.crimewave.data.model.BillingAddress(
-        if (rut.length != 9 || !rut.all { it.isDigit() }) {
-            _authState.value = _authState.value.copy(error = "El RUT debe tener exactamente 9 dígitos")
-            return false
-        }
-
-        val shippingAddress = com.example.crimewave.data.model.ShippingAddress(
             nombre = nombre,
             apellidos = apellidos,
             direccion = direccion,

@@ -3,6 +3,7 @@ package com.example.crimewave.ui.screens
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -13,12 +14,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 // Función para validar celular de 9 dígitos
 private fun validateCelular(celular: String): Boolean {
     return celular.length == 9 && celular.all { it.isDigit() }
+}
+
+// Función para validar RUT de 9 dígitos (idéntica al celular)
+private fun validateRut(rut: String): Boolean {
+    return rut.length == 9 && rut.all { it.isDigit() }
 }
 
 
@@ -57,7 +64,7 @@ fun BillingAddressScreen(
 
     // Validaciones en tiempo real
     val isValidCelular = celular.isEmpty() || validateCelular(celular)
-    val isValidRut = rut.isEmpty() || (rut.length == 9 && rut.all { it.isDigit() })
+    val isValidRut = rut.isEmpty() || validateRut(rut)
     val isValidNombre = validateName(nombre)
     val isValidApellidos = validateName(apellidos)
     val isValidCodigoPostal = codigoPostal.isEmpty() || validatePostalCode(codigoPostal)
@@ -238,13 +245,24 @@ fun BillingAddressScreen(
                     )
                     OutlinedTextField(
                         value = rut,
-                        onValueChange = { rut = it },
+                        onValueChange = { newValue ->
+                            // Solo permitir números y máximo 9 dígitos
+                            if (newValue.all { it.isDigit() } && newValue.length <= 9) {
+                                rut = newValue
+                            }
+                        },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
                         shape = RoundedCornerShape(8.dp),
+                        isError = rut.isNotEmpty() && !isValidRut,
+                        supportingText = if (rut.isNotEmpty() && !isValidRut) {
+                            { Text("Debe ser exactamente 9 dígitos", color = MaterialTheme.colorScheme.error, fontSize = 12.sp) }
+                        } else null,
+                        placeholder = { Text("123456789", color = Color.Gray.copy(alpha = 0.6f)) },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = Color.Gray,
-                            unfocusedBorderColor = Color.Gray.copy(alpha = 0.5f),
+                            focusedBorderColor = if (isValidRut) Color.Gray else MaterialTheme.colorScheme.error,
+                            unfocusedBorderColor = if (isValidRut) Color.Gray.copy(alpha = 0.5f) else MaterialTheme.colorScheme.error,
                             focusedContainerColor = Color.White,
                             unfocusedContainerColor = Color.White
                         )
