@@ -2,8 +2,13 @@ package com.example.crimewave
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.crimewave.ui.screens.HomeScreen
@@ -29,19 +34,25 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             CrimewaveTheme {
-                CrimewaveApp()
+                CrimewaveApp(
+                    onExitApp = { finish() }
+                )
             }
         }
     }
 }
 
 @Composable
-fun CrimewaveApp() {
+fun CrimewaveApp(
+    onExitApp: () -> Unit = {}
+) {
     val clothingViewModel: ClothingViewModel = viewModel()
     val authViewModel: AuthViewModel = viewModel()
 
     var currentScreen by remember { mutableStateOf("login") }
     var selectedItemId by remember { mutableStateOf("") }
+    var navigationStack by remember { mutableStateOf(listOf<String>()) }
+    var showExitDialog by remember { mutableStateOf(false) }
 
     val authState by authViewModel.authState
 
@@ -52,6 +63,37 @@ fun CrimewaveApp() {
     // Si está autenticado, asegurar que no esté en pantallas de auth
     if (isAuthenticated && (currentScreen == "login" || currentScreen == "register")) {
         currentScreen = "home"
+        navigationStack = emptyList()
+    }
+
+    // Función para navegar agregando al historial
+    fun navigateToScreen(screen: String) {
+        if (currentScreen != screen) {
+            navigationStack = navigationStack + currentScreen
+            currentScreen = screen
+        }
+    }
+
+    // Función para navegar hacia atrás
+    fun navigateBack() {
+        if (navigationStack.isNotEmpty()) {
+            currentScreen = navigationStack.lastOrNull() ?: "home"
+            navigationStack = navigationStack.dropLast(1)
+        } else if (currentScreen == "home") {
+            showExitDialog = true
+        } else if (currentScreen == "login" || currentScreen == "register") {
+            // Mostrar diálogo de confirmación también en pantallas de autenticación
+            showExitDialog = true
+        } else if (isAuthenticated) {
+            currentScreen = "home"
+        } else {
+            currentScreen = "login"
+        }
+    }
+
+    // BackHandler para manejar el botón de retroceso del sistema
+    BackHandler {
+        navigateBack()
     }
 
     // Navegación condicional basada en autenticación
@@ -61,32 +103,33 @@ fun CrimewaveApp() {
             "login", "register" -> currentScreen = "home" // Redirigir a home si ya está autenticado
             "home" -> HomeScreen(
                 clothingViewModel = clothingViewModel,
-                onNavigateToProfile = { currentScreen = "profile" },
+                onNavigateToProfile = { navigateToScreen("profile") },
                 onNavigateToDetails = { itemId ->
                     // Validar que el itemId no sea nulo o vacío antes de navegar
                     if (!itemId.isNullOrBlank()) {
                         selectedItemId = itemId
-                        currentScreen = "details"
+                        navigateToScreen("details")
                     }
                 },
-                onNavigateToReport = { currentScreen = "report" },
+                onNavigateToReport = { navigateToScreen("report") },
                 isAdmin = currentUser?.isAdmin ?: false
             )
             "profile" -> ProfileScreen(
-                onNavigateBack = { currentScreen = "home" },
-                onNavigateToSettings = { currentScreen = "settings" },
+                onNavigateBack = { navigateBack() },
+                onNavigateToSettings = { navigateToScreen("settings") },
                 onNavigateToStats = {
                     // Solo permitir acceso a stats si es administrador
                     if (currentUser?.isAdmin == true) {
-                        currentScreen = "stats"
+                        navigateToScreen("stats")
                     }
                 },
-                onNavigateToEditDetails = { currentScreen = "editDetails" },
-                onNavigateToReport = { currentScreen = "report" },
-                onNavigateToShippingAddress = { currentScreen = "viewShippingAddress" },
-                onNavigateToBillingAddress = { currentScreen = "viewBillingAddress" },
+                onNavigateToEditDetails = { navigateToScreen("editDetails") },
+                onNavigateToReport = { navigateToScreen("report") },
+                onNavigateToShippingAddress = { navigateToScreen("viewShippingAddress") },
+                onNavigateToBillingAddress = { navigateToScreen("viewBillingAddress") },
                 onLogout = {
                     authViewModel.logout()
+                    navigationStack = emptyList()
                     currentScreen = "login"
                 },
                 userEmail = currentUser?.email ?: "",
@@ -94,7 +137,7 @@ fun CrimewaveApp() {
                 isAdmin = currentUser?.isAdmin ?: false
             )
             "settings" -> SettingsScreen(
-                onNavigateBack = { currentScreen = "profile" }
+                onNavigateBack = { navigateBack() }
             )
             "details" -> {
                 // Validar que exista un id seleccionado válido
@@ -102,7 +145,7 @@ fun CrimewaveApp() {
                     DetailsScreen(
                         itemId = selectedItemId,
                         clothingViewModel = clothingViewModel,
-                        onNavigateBack = { currentScreen = "home" }
+                        onNavigateBack = { navigateBack() }
                     )
                 } else {
                     // Si no hay id válido, regresar a home
@@ -111,8 +154,9 @@ fun CrimewaveApp() {
             }
             "report" -> ReportScreen(
                 clothingViewModel = clothingViewModel,
-                onNavigateBack = { currentScreen = "home" },
+                onNavigateBack = { navigateBack() },
                 onReportSubmitted = {
+                    navigationStack = emptyList()
                     currentScreen = "home"
                 }
             )
@@ -121,8 +165,8 @@ fun CrimewaveApp() {
                 if (currentUser?.isAdmin == true) {
                     EmployeePanelScreen(
                         clothingViewModel = clothingViewModel,
-                        onNavigateBack = { currentScreen = "profile" },
-                        onNavigateToAddProduct = { currentScreen = "report" }
+                        onNavigateBack = { navigateBack() },
+                        onNavigateToAddProduct = { navigateToScreen("report") }
                     )
                 } else {
                     currentScreen = "home"
@@ -130,27 +174,27 @@ fun CrimewaveApp() {
             }
             "editDetails" -> EditDetailsScreen(
                 authViewModel = authViewModel,
-                onNavigateBack = { currentScreen = "profile" },
-                onUpdateSuccess = { currentScreen = "profile" },
+                onNavigateBack = { navigateBack() },
+                onUpdateSuccess = { navigateBack() },
                 currentEmail = currentUser?.email ?: "",
                 currentPhone = currentUser?.phoneNumber
             )
             "viewShippingAddress" -> ViewShippingAddressScreen(
-                onNavigateBack = { currentScreen = "profile" },
-                onNavigateToAdd = { currentScreen = "shippingAddress" },
+                onNavigateBack = { navigateBack() },
+                onNavigateToAdd = { navigateToScreen("shippingAddress") },
                 authViewModel = authViewModel
             )
             "viewBillingAddress" -> ViewBillingAddressScreen(
-                onNavigateBack = { currentScreen = "profile" },
-                onNavigateToAdd = { currentScreen = "billingAddress" },
+                onNavigateBack = { navigateBack() },
+                onNavigateToAdd = { navigateToScreen("billingAddress") },
                 authViewModel = authViewModel
             )
             "shippingAddress" -> ShippingAddressScreen(
-                onNavigateBack = { currentScreen = "viewShippingAddress" },
+                onNavigateBack = { navigateBack() },
                 authViewModel = authViewModel
             )
             "billingAddress" -> BillingAddressScreen(
-                onNavigateBack = { currentScreen = "viewBillingAddress" },
+                onNavigateBack = { navigateBack() },
                 authViewModel = authViewModel
             )
             else -> {
@@ -164,17 +208,49 @@ fun CrimewaveApp() {
             "login" -> LoginScreen(
                 authViewModel = authViewModel,
                 onLoginSuccess = { currentScreen = "home" },
-                onNavigateToRegister = { currentScreen = "register" }
+                onNavigateToRegister = { navigateToScreen("register") },
+                onBackPressed = { navigateBack() }
             )
             "register" -> RegisterScreen(
                 authViewModel = authViewModel,
                 onRegisterSuccess = { currentScreen = "home" },
-                onNavigateToLogin = { currentScreen = "login" }
+                onNavigateToLogin = { navigateBack() },
+                onBackPressed = { navigateBack() }
             )
             else -> {
                 // Si por alguna razón está en otra pantalla sin estar autenticado, redirigir a login
                 currentScreen = "login"
             }
         }
+    }
+
+    // Diálogo de confirmación para salir de la aplicación
+    if (showExitDialog) {
+        AlertDialog(
+            onDismissRequest = { showExitDialog = false },
+            title = {
+                Text("Salir de la aplicación")
+            },
+            text = {
+                Text("¿Estás seguro de que quieres cerrar la aplicación?")
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        // Cerrar la aplicación
+                        onExitApp()
+                    }
+                ) {
+                    Text("Salir")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showExitDialog = false }
+                ) {
+                    Text("Cancelar")
+                }
+            }
+        )
     }
 }

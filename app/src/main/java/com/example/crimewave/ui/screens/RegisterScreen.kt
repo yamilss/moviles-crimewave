@@ -1,5 +1,6 @@
 package com.example.crimewave.ui.screens
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -30,13 +31,19 @@ import com.example.crimewave.ui.viewmodel.AuthViewModel
 fun RegisterScreen(
     authViewModel: AuthViewModel,
     onRegisterSuccess: () -> Unit,
-    onNavigateToLogin: () -> Unit
+    onNavigateToLogin: () -> Unit,
+    onBackPressed: () -> Unit = {}
 ) {
     var email by remember { mutableStateOf("") }
     var phoneNumber by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     val authState by authViewModel.authState
+
+    // Manejar botón de retroceso
+    BackHandler {
+        onBackPressed()
+    }
 
     // Validaciones en tiempo real
     val isValidEmail = email.trim().isNotBlank() && android.util.Patterns.EMAIL_ADDRESS.matcher(email.trim()).matches()

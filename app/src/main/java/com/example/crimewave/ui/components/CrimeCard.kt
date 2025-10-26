@@ -2,11 +2,14 @@ package com.example.crimewave.ui.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.crimewave.data.model.ClothingItem
@@ -27,6 +30,19 @@ fun ProductCard(
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
+            // Imagen del producto
+            ProductImage(
+                imageUrl = product.imageUrl,
+                contentDescription = product.name,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
+                    .clip(RoundedCornerShape(8.dp)),
+                contentScale = ContentScale.Crop
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,

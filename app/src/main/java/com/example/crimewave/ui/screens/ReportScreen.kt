@@ -1,5 +1,14 @@
 package com.example.crimewave.ui.screens
 
+import android.Manifest
+import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.net.Uri
+import android.provider.MediaStore
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -9,20 +18,27 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Photo
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import com.example.crimewave.data.model.ProductType
 import com.example.crimewave.data.model.ClothingItem
 import com.example.crimewave.ui.viewmodel.ClothingViewModel
+import com.example.crimewave.utils.ImageUtils
+import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -31,6 +47,7 @@ fun ReportScreen(
     onNavigateBack: () -> Unit,
     onReportSubmitted: () -> Unit
 ) {
+    val context = LocalContext.current
     var productName by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var price by remember { mutableStateOf("") }
@@ -41,6 +58,53 @@ fun ReportScreen(
     var sizeExpanded by remember { mutableStateOf(false) }
     var sizeQuantity by remember { mutableStateOf("1") }
     var selectedSizes by remember { mutableStateOf(mutableMapOf<String, Int>()) }
+
+    // Variables para imagen
+    var selectedImagePath by remember { mutableStateOf<String?>(null) }
+    var showImageDialog by remember { mutableStateOf(false) }
+    var photoUri by remember { mutableStateOf<Uri?>(null) }
+
+    // Launcher para galería
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let {
+            val bitmap = ImageUtils.getBitmapFromUri(context, it)
+            bitmap?.let { bmp ->
+                val fileName = "product_${System.currentTimeMillis()}"
+                val path = ImageUtils.compressAndSaveImage(context, bmp, fileName)
+                selectedImagePath = path
+            }
+        }
+    }
+
+    // Launcher para cámara
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture()
+    ) { success: Boolean ->
+        if (success) {
+            photoUri?.let { uri ->
+                val bitmap = ImageUtils.getBitmapFromUri(context, uri)
+                bitmap?.let { bmp ->
+                    val fileName = "product_${System.currentTimeMillis()}"
+                    val path = ImageUtils.compressAndSaveImage(context, bmp, fileName)
+                    selectedImagePath = path
+                }
+            }
+        }
+    }
+
+    // Launcher para permisos de cámara
+    val cameraPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        if (isGranted) {
+            // Crear archivo temporal para la foto
+            val photoFile = ImageUtils.createImageFile(context)
+            photoUri = ImageUtils.getUriForFile(context, photoFile)
+            cameraLauncher.launch(photoUri)
+        }
+    }
 
     // Listas de tallas/medidas según la categoría
     val availableOptions = remember(selectedCategory) {
@@ -657,12 +721,7 @@ fun ReportScreen(
                         ) {
                             OutlinedButton(
                                 onClick = {
-                                    // Simulamos selección de imagen predeterminada basada en categoría
-                                    selectedImage = when (selectedCategory) {
-                                        ProductType.POLERAS -> "satorupolera"
-                                        ProductType.POLERONES -> "togahoodie"
-                                        ProductType.CUADROS -> "givencuadro"
-                                    }
+                                    showImageDialog = true
                                 },
                                 modifier = Modifier.padding(end = 12.dp),
                                 colors = ButtonDefaults.outlinedButtonColors(
@@ -675,14 +734,14 @@ fun ReportScreen(
 
                             Column {
                                 Text(
-                                    text = if (selectedImage != null) "Imagen seleccionada: ${selectedImage!!}" else "No se ha seleccionado ningún archivo",
-                                    color = if (selectedImage != null) Color(0xFF4CAF50) else Color.Gray,
+                                    text = if (selectedImagePath != null) "Imagen personalizada seleccionada" else "No se ha seleccionado ningún archivo",
+                                    color = if (selectedImagePath != null) Color(0xFF4CAF50) else Color.Gray,
                                     fontSize = 13.sp
                                 )
 
-                                if (selectedImage != null) {
+                                if (selectedImagePath != null) {
                                     TextButton(
-                                        onClick = { selectedImage = null },
+                                        onClick = { selectedImagePath = null },
                                         modifier = Modifier.padding(0.dp)
                                     ) {
                                         Text(
@@ -747,13 +806,20 @@ fun ReportScreen(
                                 return@Button // No crear el producto si el stock es negativo
                             }
 
+                            // Determinar qué imagen usar
+                            val productImageUrl = selectedImagePath ?: when (selectedCategory) {
+                                ProductType.POLERAS -> "satorupolera"
+                                ProductType.POLERONES -> "togahoodie"
+                                ProductType.CUADROS -> "givencuadro"
+                            }
+
                             // Crear nuevo producto
                             val newProduct = ClothingItem(
                                 id = clothingViewModel.generateNextProductId(),
                                 name = productName.trim(),
                                 description = description.trim(),
                                 price = finalPrice,
-                                imageUrl = "default_product",
+                                imageUrl = productImageUrl,
                                 category = selectedCategory,
                                 isNew = true,
                                 isFeatured = false,
@@ -796,6 +862,109 @@ fun ReportScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
         }
+    }
+
+    // Diálogo para seleccionar imagen
+    if (showImageDialog) {
+        AlertDialog(
+            onDismissRequest = { showImageDialog = false },
+            title = {
+                Text("Seleccionar imagen del producto")
+            },
+            text = {
+                Column {
+                    Text("¿Cómo deseas agregar la imagen del producto?")
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Botones principales
+                    Button(
+                        onClick = {
+                            showImageDialog = false
+                            // Verificar permisos de cámara
+                            when (PackageManager.PERMISSION_GRANTED) {
+                                ContextCompat.checkSelfPermission(
+                                    context,
+                                    Manifest.permission.CAMERA
+                                ) -> {
+                                    // Permiso otorgado, abrir cámara
+                                    val photoFile = ImageUtils.createImageFile(context)
+                                    photoUri = ImageUtils.getUriForFile(context, photoFile)
+                                    cameraLauncher.launch(photoUri)
+                                }
+                                else -> {
+                                    // Solicitar permiso
+                                    cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+                                }
+                            }
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF2196F3)
+                        )
+                    ) {
+                        Icon(
+                            Icons.Default.CameraAlt,
+                            contentDescription = null,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Tomar foto")
+                    }
+
+                    Button(
+                        onClick = {
+                            showImageDialog = false
+                            galleryLauncher.launch("image/*")
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF4CAF50)
+                        )
+                    ) {
+                        Icon(
+                            Icons.Default.Photo,
+                            contentDescription = null,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Elegir de galería")
+                    }
+
+                    OutlinedButton(
+                        onClick = {
+                            showImageDialog = false
+                            selectedImagePath = null // Usará imagen por defecto
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp)
+                    ) {
+                        Text("Usar imagen por defecto")
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Botón Cancelar centrado
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        TextButton(
+                            onClick = { showImageDialog = false }
+                        ) {
+                            Text("Cancelar")
+                        }
+                    }
+                }
+            },
+            confirmButton = {},
+            dismissButton = {}
+        )
     }
 }
 

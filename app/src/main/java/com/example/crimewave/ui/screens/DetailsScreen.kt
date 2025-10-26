@@ -11,17 +11,22 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
+
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import android.graphics.BitmapFactory
+import java.io.File
 import com.example.crimewave.data.model.ClothingItem
 import com.example.crimewave.data.model.ProductType
 import com.example.crimewave.ui.viewmodel.ClothingViewModel
+import com.example.crimewave.ui.components.ProductImage
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -68,7 +73,15 @@ fun DetailsScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // Imagen del producto
-            ProductImage(imageUrl = selectedProduct.imageUrl)
+            ProductImage(
+                imageUrl = selectedProduct.imageUrl,
+                contentDescription = selectedProduct.name,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(300.dp)
+                    .clip(RoundedCornerShape(12.dp)),
+                contentScale = ContentScale.Crop
+            )
 
             // Información principal del producto
             Card {
@@ -240,39 +253,5 @@ private fun getCategoryText(category: ProductType): String {
     }
 }
 
-@Composable
-private fun ProductImage(imageUrl: String) {
-    val imageResId = getImageResource(imageUrl)
 
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(300.dp),
-        shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
-    ) {
-        Image(
-            painter = painterResource(id = imageResId),
-            contentDescription = "Imagen del producto",
-            modifier = Modifier
-                .fillMaxSize()
-                .clip(RoundedCornerShape(16.dp)),
-            contentScale = ContentScale.Crop
-        )
-    }
-}
-
-private fun getImageResource(imageUrl: String): Int {
-    return when (imageUrl) {
-        "satorupolera" -> com.example.crimewave.R.drawable.satorupolera
-        "togahoodie" -> com.example.crimewave.R.drawable.togahoodie
-        "givencuadro" -> com.example.crimewave.R.drawable.givencuadro
-        "polerongojo" -> com.example.crimewave.R.drawable.polerongojo
-        "logocrimewave" -> com.example.crimewave.R.drawable.logocrimewave
-        "bolsaanime" -> com.example.crimewave.R.drawable.bolsaanime
-        "makima" -> com.example.crimewave.R.drawable.makima
-        "power" -> com.example.crimewave.R.drawable.power
-        else -> com.example.crimewave.R.drawable.satorupolera // imagen por defecto
-    }
-}
 
