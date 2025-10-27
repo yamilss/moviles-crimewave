@@ -159,18 +159,17 @@ fun ProfileScreen(
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
 
-                    // Botón para editar detalles (disponible para todos los usuarios)
-                    Button(
-                        onClick = onNavigateToEditDetails,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text("Editar Mis Detalles")
-                    }
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
                     // Botones específicos para clientes
                     if (!isAdmin) {
+                        // Botón para editar detalles (solo para clientes)
+                        Button(
+                            onClick = onNavigateToEditDetails,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text("Editar Mis Detalles")
+                        }
+
+                        Spacer(modifier = Modifier.height(8.dp))
                         OutlinedButton(
                             onClick = onNavigateToShippingAddress,
                             modifier = Modifier.fillMaxWidth()

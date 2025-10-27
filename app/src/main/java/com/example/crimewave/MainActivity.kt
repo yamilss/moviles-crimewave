@@ -67,12 +67,18 @@ fun CrimewaveApp(
     val isAuthenticated = authState.isAuthenticated
     val currentUser = authState.currentUser
 
-    // Si está autenticado, asegurar que no esté en pantallas de auth
-    if (isAuthenticated && (currentScreen == "login" || currentScreen == "register")) {
-        previousScreen = currentScreen
-        currentScreen = "home"
-        navigationStack = emptyList()
+    // Configurar el usuario actual en el CartViewModel cuando cambie el estado de autenticación
+    LaunchedEffect(currentUser) {
+        cartViewModel.setCurrentUser(currentUser)
     }
+
+    // Siempre empezar en login al abrir la aplicación
+    // Comentado el auto-redirect para mantener login como pantalla inicial
+    // if (isAuthenticated && (currentScreen == "login" || currentScreen == "register")) {
+    //     previousScreen = currentScreen
+    //     currentScreen = "home"
+    //     navigationStack = emptyList()
+    // }
 
     // Función para navegar agregando al historial
     fun navigateToScreen(screen: String) {
@@ -108,8 +114,8 @@ fun CrimewaveApp(
         navigateBack()
     }
 
-    // Navegación condicional basada en autenticación
-    if (isAuthenticated) {
+    // Navegación condicional basada en autenticación y pantalla actual
+    if (isAuthenticated && currentScreen != "login" && currentScreen != "register") {
         // Usuario autenticado - mostrar aplicación principal con animaciones de slide
         AnimatedScreenTransition(
             targetScreen = currentScreen,
@@ -129,7 +135,12 @@ fun CrimewaveApp(
                     }
                 },
                 onNavigateToReport = { navigateToScreen("report") },
-                onNavigateToCart = { navigateToScreen("cart") },
+                onNavigateToCart = {
+                    // Solo permitir acceso al carrito si no es admin
+                    if (currentUser?.isAdmin != true) {
+                        navigateToScreen("cart")
+                    }
+                },
                 isAdmin = currentUser?.isAdmin ?: false
             )
             "profile" -> ProfileScreen(
@@ -167,7 +178,12 @@ fun CrimewaveApp(
                         clothingViewModel = clothingViewModel,
                         cartViewModel = cartViewModel,
                         onNavigateBack = { navigateBack() },
-                        onNavigateToCart = { navigateToScreen("cart") }
+                        onNavigateToCart = {
+                            // Solo permitir acceso al carrito si no es admin
+                            if (currentUser?.isAdmin != true) {
+                                navigateToScreen("cart")
+                            }
+                        }
                     )
                 } else {
                     // Si no hay id válido, regresar a home

@@ -28,6 +28,15 @@ fun CheckoutScreen(
 ) {
     val cartState by cartViewModel.cartState
     var isProcessing by remember { mutableStateOf(false) }
+    val isAdmin = cartViewModel.isCurrentUserAdmin()
+
+    // Si es admin, redirigir automáticamente
+    if (isAdmin) {
+        LaunchedEffect(Unit) {
+            onNavigateBack()
+        }
+        return
+    }
 
     Scaffold(
         topBar = {

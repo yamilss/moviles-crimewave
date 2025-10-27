@@ -9,12 +9,12 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.crimewave.ui.components.ProductCard
 import com.example.crimewave.ui.viewmodel.ClothingViewModel
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -37,19 +37,21 @@ fun HomeScreen(
             TopAppBar(
                 title = { Text("Catálago") },
                 actions = {
-                    // Botón del carrito con badge
-                    Box {
-                        IconButton(onClick = onNavigateToCart) {
-                            Icon(Icons.Default.ShoppingCart, contentDescription = "Carrito")
-                        }
-                        if (cartState.totalItems > 0) {
-                            Badge(
-                                modifier = Modifier.offset(x = (-8).dp, y = 8.dp)
-                            ) {
-                                Text(
-                                    text = cartState.totalItems.toString(),
-                                    style = MaterialTheme.typography.labelSmall
-                                )
+                    // Botón del carrito con badge (solo para usuarios no administradores)
+                    if (!isAdmin) {
+                        Box {
+                            IconButton(onClick = onNavigateToCart) {
+                                Icon(Icons.Default.ShoppingCart, contentDescription = "Carrito")
+                            }
+                            if (cartState.totalItems > 0) {
+                                Badge(
+                                    modifier = Modifier.offset(x = (-8).dp, y = 8.dp)
+                                ) {
+                                    Text(
+                                        text = cartState.totalItems.toString(),
+                                        style = MaterialTheme.typography.labelSmall
+                                    )
+                                }
                             }
                         }
                     }

@@ -47,6 +47,7 @@ fun LoginScreen(
     // Validaciones en tiempo real
     val isValidForm = email.trim().isNotBlank() && password.trim().isNotBlank()
 
+
     // Efectos secundarios para manejar el éxito del login
     LaunchedEffect(authState.isAuthenticated) {
         if (authState.isAuthenticated) {
@@ -247,6 +248,7 @@ fun LoginScreen(
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
                 }
+
 
                 // Enlace de registro
                 Row(

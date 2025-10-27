@@ -1,43 +1,47 @@
 package com.example.crimewave.ui.viewmodel
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.State
 import com.example.crimewave.data.model.User
 import com.example.crimewave.data.model.AuthState
+import com.example.crimewave.data.model.ShippingAddress
+import com.example.crimewave.data.model.BillingAddress
+import com.example.crimewave.data.repository.UserRepository
 
-class AuthViewModel : ViewModel() {
+class AuthViewModel(application: Application) : AndroidViewModel(application) {
+    private val userRepository = UserRepository(application.applicationContext)
+
     private val _authState = mutableStateOf(AuthState())
     val authState: State<AuthState> = _authState
 
-    // Lista de usuarios registrados (en una app real esto estaría en una base de datos)
-    private val _registeredUsers = mutableStateOf<List<User>>(
-        listOf(
-            User(
-                email = "admin",
-                password = "admin",
-                isAdmin = true
-            ),
-            User(
-                email = "hola",
-                password = "hola",
-                phoneNumber = "987654321",
-                isAdmin = false
-            )
+    init {
+        // Asegurar que existan usuarios por defecto
+        userRepository.forceReinitializeUsers()
+
+        // Siempre empezar en estado no autenticado para mostrar login
+        _authState.value = AuthState(
+            isAuthenticated = false,
+            currentUser = null,
+            error = null
         )
-    )
+    }
 
     fun login(email: String, password: String) {
+        // Limpiar error previo
+        _authState.value = _authState.value.copy(error = null)
+
         if (email.isBlank() || password.isBlank()) {
             _authState.value = _authState.value.copy(error = "Por favor complete todos los campos")
             return
         }
 
-        val user = _registeredUsers.value.find {
-            it.email == email && it.password == password
-        }
+        // Buscar usuario
+        val user = userRepository.authenticateUser(email.trim(), password.trim())
 
         if (user != null) {
+            userRepository.saveCurrentUser(user)
             _authState.value = AuthState(
                 isAuthenticated = true,
                 currentUser = user,
@@ -77,12 +81,6 @@ class AuthViewModel : ViewModel() {
             return
         }
 
-        // Verificar si el usuario ya existe
-        if (_registeredUsers.value.any { it.email == email }) {
-            _authState.value = _authState.value.copy(error = "El usuario ya existe")
-            return
-        }
-
         // Crear nuevo usuario
         val newUser = User(
             email = email,
@@ -91,18 +89,29 @@ class AuthViewModel : ViewModel() {
             isAdmin = false
         )
 
-        _registeredUsers.value = _registeredUsers.value + newUser
+        // Intentar registrar el usuario
+        val success = userRepository.registerUser(newUser)
 
-        // Auto-login después del registro
-        _authState.value = AuthState(
-            isAuthenticated = true,
-            currentUser = newUser,
-            error = null
-        )
+        if (success) {
+            // Auto-login después del registro
+            userRepository.saveCurrentUser(newUser)
+            _authState.value = AuthState(
+                isAuthenticated = true,
+                currentUser = newUser,
+                error = null
+            )
+        } else {
+            _authState.value = _authState.value.copy(error = "El usuario ya existe")
+        }
     }
 
     fun logout() {
-        _authState.value = AuthState()
+        userRepository.logout()
+        _authState.value = AuthState(
+            isAuthenticated = false,
+            currentUser = null,
+            error = null
+        )
     }
 
     fun clearError() {
@@ -144,10 +153,8 @@ class AuthViewModel : ViewModel() {
             password = newPassword?.takeIf { it.isNotBlank() } ?: currentUser.password
         )
 
-        // Actualizar en la lista de usuarios registrados
-        _registeredUsers.value = _registeredUsers.value.map { user ->
-            if (user.email == currentUser.email) updatedUser else user
-        }
+        // Actualizar en el repositorio
+        userRepository.updateUser(updatedUser)
 
         // Actualizar el usuario actual en la sesión
         _authState.value = _authState.value.copy(
@@ -207,10 +214,8 @@ class AuthViewModel : ViewModel() {
 
         val updatedUser = currentUser.copy(shippingAddress = shippingAddress)
 
-        // Actualizar en la lista de usuarios registrados
-        _registeredUsers.value = _registeredUsers.value.map { user ->
-            if (user.email == currentUser.email) updatedUser else user
-        }
+        // Actualizar en el repositorio
+        userRepository.updateUser(updatedUser)
 
         // Actualizar el usuario actual en la sesión
         _authState.value = _authState.value.copy(currentUser = updatedUser)
@@ -267,10 +272,8 @@ class AuthViewModel : ViewModel() {
 
         val updatedUser = currentUser.copy(billingAddress = billingAddress)
 
-        // Actualizar en la lista de usuarios registrados
-        _registeredUsers.value = _registeredUsers.value.map { user ->
-            if (user.email == currentUser.email) updatedUser else user
-        }
+        // Actualizar en el repositorio
+        userRepository.updateUser(updatedUser)
 
         // Actualizar el usuario actual en la sesión
         _authState.value = _authState.value.copy(currentUser = updatedUser)
@@ -282,10 +285,8 @@ class AuthViewModel : ViewModel() {
         val currentUser = _authState.value.currentUser ?: return false
         val updatedUser = currentUser.copy(shippingAddress = null)
 
-        // Actualizar en la lista de usuarios registrados
-        _registeredUsers.value = _registeredUsers.value.map { user ->
-            if (user.email == currentUser.email) updatedUser else user
-        }
+        // Actualizar en el repositorio
+        userRepository.updateUser(updatedUser)
 
         // Actualizar el usuario actual en la sesión
         _authState.value = _authState.value.copy(currentUser = updatedUser)
@@ -298,13 +299,26 @@ class AuthViewModel : ViewModel() {
         val currentUser = _authState.value.currentUser ?: return false
         val updatedUser = currentUser.copy(billingAddress = null)
 
-        // Actualizar en la lista de usuarios registrados
-        _registeredUsers.value = _registeredUsers.value.map { user ->
-            if (user.email == currentUser.email) updatedUser else user
-        }
+        // Actualizar en el repositorio
+        userRepository.updateUser(updatedUser)
 
         // Actualizar el usuario actual en la sesión
         _authState.value = _authState.value.copy(currentUser = updatedUser)
         return true
+    }
+
+    // Función para reinicializar usuarios predeterminados (útil para debugging)
+    fun reinitializeUsers() {
+        userRepository.forceReinitializeUsers()
+    }
+
+    // Función para obtener la lista de usuarios registrados (para debugging)
+    fun getRegisteredUsers(): List<User> {
+        return userRepository.getRegisteredUsers()
+    }
+
+    // Función para verificar si un usuario existe
+    fun userExists(email: String): Boolean {
+        return userRepository.getRegisteredUsers().any { it.email == email }
     }
 }

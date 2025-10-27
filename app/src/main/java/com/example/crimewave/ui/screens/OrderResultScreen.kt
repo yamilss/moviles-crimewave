@@ -27,6 +27,15 @@ fun OrderResultScreen(
     onNavigateToCart: () -> Unit
 ) {
     val lastOrder by cartViewModel.lastOrder
+    val isAdmin = cartViewModel.isCurrentUserAdmin()
+
+    // Si es admin, redirigir automáticamente al home
+    if (isAdmin) {
+        LaunchedEffect(Unit) {
+            onNavigateToHome()
+        }
+        return
+    }
 
     when {
         lastOrder?.status == OrderStatus.APPROVED -> {

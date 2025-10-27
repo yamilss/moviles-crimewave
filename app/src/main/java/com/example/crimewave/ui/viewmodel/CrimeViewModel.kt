@@ -1,13 +1,16 @@
 package com.example.crimewave.ui.viewmodel
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.State
 import com.example.crimewave.data.model.ClothingItem
 import com.example.crimewave.data.model.ClothingCategory
 import com.example.crimewave.data.model.ProductType
+import com.example.crimewave.data.repository.ProductRepository
 
-class ClothingViewModel : ViewModel() {
+class ClothingViewModel(application: Application) : AndroidViewModel(application) {
+    private val productRepository = ProductRepository(application.applicationContext)
     private val _products = mutableStateOf<List<ClothingItem>>(emptyList())
     val products: State<List<ClothingItem>> = _products
 
@@ -27,43 +30,13 @@ class ClothingViewModel : ViewModel() {
     val cartItems: State<List<ClothingItem>> = _cartItems
 
     init {
-        loadSampleData()
+        loadProductsFromRepository()
         loadCategories()
         loadFeaturedProducts()
     }
 
-    private fun loadSampleData() {
-        _products.value = listOf(
-            ClothingItem(
-                id = "1",
-                name = "Polera Satoru Gojo",
-                description = "Diseño original de Satoru Gojo del anime Jujutsu Kaisen",
-                price = 22000.0,
-                imageUrl = "satorupolera",
-                category = ProductType.POLERAS,
-                isNew = true
-            ),
-            ClothingItem(
-                id = "2",
-                name = "Polerón Toga Himiko",
-                description = "Polerón con diseño de Himiko Toga del anime My Hero Academia",
-                price = 42000.0,
-                imageUrl = "togahoodie",
-                category = ProductType.POLERONES,
-                isNew = true,
-                isFeatured = true
-            ),
-            ClothingItem(
-                id = "3",
-                name = "Cuadro Given",
-                description = "Cuadro decorativo minimalista con diseño del anime Given",
-                price = 45000.0,
-                imageUrl = "givencuadro",
-                category = ProductType.CUADROS,
-                isNew = true,
-                sizes = listOf("30x39", "40x50", "50x70", "70x81")
-            )
-        )
+    private fun loadProductsFromRepository() {
+        _products.value = productRepository.getProducts()
     }
 
     private fun loadCategories() {
@@ -112,7 +85,7 @@ class ClothingViewModel : ViewModel() {
     }
 
     fun getProductById(id: String): ClothingItem? {
-        return _products.value.find { it.id == id }
+        return productRepository.getProductById(id)
     }
 
     fun selectProduct(product: ClothingItem) {
@@ -120,7 +93,7 @@ class ClothingViewModel : ViewModel() {
     }
 
     fun getProductsByCategory(category: ProductType): List<ClothingItem> {
-        return _products.value.filter { it.category == category }
+        return productRepository.getProductsByCategory(category)
     }
 
     fun addToCart(product: ClothingItem) {
@@ -179,11 +152,6 @@ class ClothingViewModel : ViewModel() {
         // Validar el producto antes de agregarlo
         validateProduct(product)
 
-        // Verificar que no exista un producto con el mismo ID
-        if (_products.value.any { it.id == product.id }) {
-            throw IllegalArgumentException("Ya existe un producto con ID: ${product.id}")
-        }
-
         // Si el producto tiene imagen por defecto, asignar la imagen predeterminada según la categoría
         val productWithImage = if (product.imageUrl == "default_product" || product.imageUrl.isBlank()) {
             product.copy(imageUrl = getDefaultImageForCategory(product.category))
@@ -191,7 +159,13 @@ class ClothingViewModel : ViewModel() {
             product
         }
 
-        _products.value = _products.value + productWithImage
+        val success = productRepository.addProduct(productWithImage)
+        if (!success) {
+            throw IllegalArgumentException("Ya existe un producto con ID: ${product.id}")
+        }
+
+        // Actualizar el estado local
+        loadProductsFromRepository()
         loadFeaturedProducts() // Actualizar productos destacados
     }
 
@@ -201,12 +175,13 @@ class ClothingViewModel : ViewModel() {
             throw IllegalArgumentException("ID de producto inválido")
         }
 
-        // Verificar que el producto exista antes de eliminar
-        if (!_products.value.any { it.id == productId }) {
+        val success = productRepository.deleteProduct(productId)
+        if (!success) {
             throw IllegalArgumentException("No existe un producto con ID: $productId")
         }
 
-        _products.value = _products.value.filter { it.id != productId }
+        // Actualizar el estado local
+        loadProductsFromRepository()
         loadFeaturedProducts() // Actualizar productos destacados
     }
 
@@ -214,14 +189,13 @@ class ClothingViewModel : ViewModel() {
         // Validar el producto antes de actualizarlo
         validateProduct(updatedProduct)
 
-        // Verificar que el producto exista antes de actualizar
-        if (!_products.value.any { it.id == updatedProduct.id }) {
+        val success = productRepository.updateProduct(updatedProduct)
+        if (!success) {
             throw IllegalArgumentException("No existe un producto con ID: ${updatedProduct.id}")
         }
 
-        _products.value = _products.value.map { product ->
-            if (product.id == updatedProduct.id) updatedProduct else product
-        }
+        // Actualizar el estado local
+        loadProductsFromRepository()
         loadFeaturedProducts() // Actualizar productos destacados
     }
 

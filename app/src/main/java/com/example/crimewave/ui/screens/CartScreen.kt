@@ -35,6 +35,29 @@ fun CartScreen(
     onNavigateToCheckout: () -> Unit
 ) {
     val cartState by cartViewModel.cartState
+    val isAdmin = cartViewModel.isCurrentUserAdmin()
+
+    // Si es admin, mostrar mensaje de acceso no autorizado
+    if (isAdmin) {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = { Text("Carrito de Compras") },
+                    navigationIcon = {
+                        IconButton(onClick = onNavigateBack) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Atrás")
+                        }
+                    }
+                )
+            }
+        ) { paddingValues ->
+            AdminRestrictedContent(
+                onNavigateBack = onNavigateBack,
+                modifier = Modifier.padding(paddingValues)
+            )
+        }
+        return
+    }
 
     Scaffold(
         topBar = {
@@ -351,6 +374,54 @@ fun CartSummary(
                     style = MaterialTheme.typography.titleMedium
                 )
             }
+        }
+    }
+}
+
+@Composable
+fun AdminRestrictedContent(
+    onNavigateBack: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Icon(
+            imageVector = Icons.Default.Warning,
+            contentDescription = null,
+            modifier = Modifier.size(120.dp),
+            tint = MaterialTheme.colorScheme.error
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Text(
+            text = "Acceso Restringido",
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.error
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = "Los administradores no tienen acceso al carrito de compras.",
+            style = MaterialTheme.typography.bodyLarge,
+            color = Color.Gray,
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        Button(
+            onClick = onNavigateBack,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Volver")
         }
     }
 }

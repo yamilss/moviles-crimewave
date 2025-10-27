@@ -9,12 +9,15 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
 import com.example.crimewave.data.model.ClothingItem
 import com.example.crimewave.data.model.ProductType
 import com.example.crimewave.ui.viewmodel.ClothingViewModel
@@ -48,7 +51,8 @@ fun DetailsScreen(
     }
 
     var selectedSize by remember { mutableStateOf(selectedProduct.sizes.firstOrNull() ?: "") }
-    var showAddedToCartMessage by remember { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
+    val coroutineScope = rememberCoroutineScope()
 
     Scaffold(
         topBar = {
@@ -60,6 +64,9 @@ fun DetailsScreen(
                     }
                 }
             )
+        },
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState)
         }
     ) { innerPadding ->
         Column(
@@ -217,12 +224,20 @@ fun DetailsScreen(
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
 
-                    if (selectedProduct.stock > 0) {
+                    // Solo mostrar botón "Agregar al Carrito" si no es admin y hay stock
+                    if (selectedProduct.stock > 0 && !cartViewModel.isCurrentUserAdmin()) {
                         Button(
                             onClick = {
                                 if (selectedSize.isNotEmpty()) {
                                     cartViewModel.addToCart(selectedProduct, selectedSize)
-                                    showAddedToCartMessage = true
+
+                                    // Mostrar mensaje de confirmación usando corrutina
+                                    coroutineScope.launch {
+                                        snackbarHostState.showSnackbar(
+                                            message = "✅ ${selectedProduct.name} agregado al carrito",
+                                            duration = SnackbarDuration.Short
+                                        )
+                                    }
                                 }
                             },
                             modifier = Modifier.fillMaxWidth(),
@@ -236,7 +251,7 @@ fun DetailsScreen(
                             Spacer(modifier = Modifier.width(8.dp))
                             Text("Agregar al Carrito")
                         }
-
+                        // Mensaje de error para talla/medida no seleccionada
                         if (selectedSize.isEmpty() && selectedProduct.sizes.isNotEmpty() && selectedProduct.sizes != listOf("N/A")) {
                             Text(
                                 text = if (selectedProduct.category == ProductType.CUADROS) "* Selecciona una medida" else "* Selecciona una talla",
@@ -245,7 +260,17 @@ fun DetailsScreen(
                                 modifier = Modifier.padding(top = 8.dp)
                             )
                         }
+                    } else if (cartViewModel.isCurrentUserAdmin()) {
+                        // Mostrar mensaje para administradores
+                        Text(
+                            text = "Los administradores no pueden agregar productos al carrito",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color.Gray,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth()
+                        )
                     } else {
+                        // Sin stock
                         Button(
                             onClick = { },
                             modifier = Modifier.fillMaxWidth(),
@@ -257,36 +282,78 @@ fun DetailsScreen(
 
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    OutlinedButton(
-                        onClick = onNavigateToCart,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Icon(
-                            Icons.Default.ShoppingCart,
-                            contentDescription = null,
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Ver el Carrito")
+                    // Solo mostrar botón del carrito si no es admin
+                    if (!cartViewModel.isCurrentUserAdmin()) {
+                        OutlinedButton(
+                            onClick = onNavigateToCart,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Icon(
+                                Icons.Default.ShoppingCart,
+                                contentDescription = null,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Ver el Carrito")
+                        }
                     }
                 }
             }
-        }
+            // Sección de reseñas
+            Card(
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Text(
+                        text = "⭐ Reseñas ⭐",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
 
-        // Mensaje de confirmación
-        if (showAddedToCartMessage) {
-            LaunchedEffect(showAddedToCartMessage) {
-                kotlinx.coroutines.delay(2000)
-                showAddedToCartMessage = false
+                    when (selectedProduct.category) {
+                        ProductType.POLERAS -> {
+                            Text(
+                                text = "— @carolina_m: La tela es suave y se siente de buena calidad.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier.padding(bottom = 8.dp)
+                            )
+                            Text(
+                                text = "— @javier98: Muy buen material, cómodo y resistente.",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+
+                        ProductType.POLERONES -> {
+                            Text(
+                                text = "— @danielarojas: Muy cómodo y abrigado, ideal para el invierno.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier.padding(bottom = 8.dp)
+                            )
+                            Text(
+                                text = "— @tomasv: Buena calidad y el color no se destiñe con los lavados.",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+
+                        ProductType.CUADROS -> {
+                            Text(
+                                text = "— @valeriarios: Los colores son vivos y el marco tiene buen acabado.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier.padding(bottom = 8.dp)
+                            )
+                            Text(
+                                text = "— @martinpz: Llegó bien embalado y se ve increíble en mi pared.",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+                    }
+                }
             }
-        }
-    }
 
-    // Snackbar de confirmación
-    if (showAddedToCartMessage) {
-        LaunchedEffect(Unit) {
-            kotlinx.coroutines.delay(2000)
-            showAddedToCartMessage = false
+
         }
     }
 }
