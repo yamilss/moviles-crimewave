@@ -4,13 +4,17 @@ import android.content.Context
 import android.content.SharedPreferences
 import com.example.crimewave.data.model.ClothingItem
 import com.example.crimewave.data.model.ProductType
+import com.example.crimewave.data.serialization.ClothingItemTypeAdapter
 import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 
 class ProductRepository(context: Context) {
     private val sharedPreferences: SharedPreferences =
         context.getSharedPreferences("product_prefs", Context.MODE_PRIVATE)
-    private val gson = Gson()
+    private val gson = GsonBuilder()
+        .registerTypeAdapter(ClothingItem::class.java, ClothingItemTypeAdapter())
+        .create()
 
     companion object {
         private const val KEY_PRODUCTS = "products"
@@ -31,6 +35,7 @@ class ProductRepository(context: Context) {
                 description = "Diseño original de Satoru Gojo del anime Jujutsu Kaisen",
                 price = 22000.0,
                 imageUrl = "satorupolera",
+                imageUrls = listOf("satorupolera", "satorupolera_2", "satorupolera_3"),
                 category = ProductType.POLERAS,
                 isNew = true,
                 sizes = listOf("S", "M", "L", "XL")
@@ -41,6 +46,7 @@ class ProductRepository(context: Context) {
                 description = "Polerón con diseño de Himiko Toga del anime My Hero Academia",
                 price = 42000.0,
                 imageUrl = "togahoodie",
+                imageUrls = listOf("togahoodie", "togahoodie_2", "togahoodie_3"),
                 category = ProductType.POLERONES,
                 isNew = true,
                 isFeatured = true,
@@ -52,6 +58,7 @@ class ProductRepository(context: Context) {
                 description = "Cuadro decorativo minimalista con diseño del anime Given",
                 price = 45000.0,
                 imageUrl = "givencuadro",
+                imageUrls = listOf("givencuadro", "givencuadro_2", "givencuadro_3"),
                 category = ProductType.CUADROS,
                 isNew = true,
                 sizes = listOf("30x39", "40x50", "50x70", "70x81")

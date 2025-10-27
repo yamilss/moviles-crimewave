@@ -1,5 +1,6 @@
 package com.example.crimewave.ui.screens
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -8,8 +9,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.crimewave.R
 import com.example.crimewave.ui.viewmodel.ClothingViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -60,7 +64,6 @@ fun ProfileScreen(
                     modifier = Modifier.padding(24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    // Avatar placeholder
                     Surface(
                         modifier = Modifier.size(80.dp),
                         shape = MaterialTheme.shapes.extraLarge,
@@ -69,6 +72,13 @@ fun ProfileScreen(
                         Box(
                             contentAlignment = Alignment.Center
                         ) {
+                            Image(
+                                painter = painterResource(id = R.drawable.logocrimewave),
+                                contentDescription = null,
+                                modifier = Modifier.size(60.dp),
+                                contentScale = ContentScale.Fit
+                            )
+                            
                             Text(
                                 text = "😢",
                                 style = MaterialTheme.typography.headlineLarge
@@ -97,7 +107,6 @@ fun ProfileScreen(
                         horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
                         if (isAdmin) {
-                            // Métricas para administrador
                             val productCount = clothingViewModel?.products?.value?.size ?: 0
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Text(
@@ -112,7 +121,6 @@ fun ProfileScreen(
                                 )
                             }
                         } else {
-                            // Métricas para cliente
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Text(
                                     text = "0",
@@ -145,7 +153,6 @@ fun ProfileScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Acciones rápidas
             Card(
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -159,9 +166,7 @@ fun ProfileScreen(
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
 
-                    // Botones específicos para clientes
                     if (!isAdmin) {
-                        // Botón para editar detalles (solo para clientes)
                         Button(
                             onClick = onNavigateToEditDetails,
                             modifier = Modifier.fillMaxWidth()
@@ -189,7 +194,6 @@ fun ProfileScreen(
                         Spacer(modifier = Modifier.height(8.dp))
                     }
 
-                    // Botones específicos para administrador
                     if (isAdmin) {
                         OutlinedButton(
                             onClick = onNavigateToReport,
@@ -219,7 +223,6 @@ fun ProfileScreen(
                         Spacer(modifier = Modifier.height(8.dp))
                     }
 
-                    // Botón de cerrar sesión
                     OutlinedButton(
                         onClick = onLogout,
                         modifier = Modifier.fillMaxWidth(),

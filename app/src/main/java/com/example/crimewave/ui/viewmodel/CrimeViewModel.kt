@@ -36,7 +36,11 @@ class ClothingViewModel(application: Application) : AndroidViewModel(application
     }
 
     private fun loadProductsFromRepository() {
-        _products.value = productRepository.getProducts()
+        try {
+            _products.value = productRepository.getProducts()
+        } catch (e: Exception) {
+            _products.value = emptyList()
+        }
     }
 
     private fun loadCategories() {
@@ -85,7 +89,11 @@ class ClothingViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun getProductById(id: String): ClothingItem? {
-        return productRepository.getProductById(id)
+        return try {
+            productRepository.getProductById(id)
+        } catch (e: Exception) {
+            null
+        }
     }
 
     fun selectProduct(product: ClothingItem) {
@@ -97,17 +105,14 @@ class ClothingViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun addToCart(product: ClothingItem) {
-        // Validar que el producto no sea nulo
         if (product.id.isBlank()) {
             throw IllegalArgumentException("Producto inválido")
         }
 
-        // Validar que el producto tenga stock disponible
         if (product.stock <= 0) {
             throw IllegalArgumentException("No hay stock disponible para este producto")
         }
 
-        // Validar que el precio sea válido
         if (product.price < 0) {
             throw IllegalArgumentException("Precio inválido")
         }
@@ -116,7 +121,6 @@ class ClothingViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun removeFromCart(productId: String) {
-        // Validar que el productId no esté vacío
         if (productId.isBlank()) {
             throw IllegalArgumentException("ID de producto inválido")
         }
@@ -129,7 +133,7 @@ class ClothingViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun navigateVideo(direction: String) {
-        val videoCount = 5 // Total de videos disponibles
+        val videoCount = 5
         if (direction == "left") {
             _currentVideoIndex.value = (_currentVideoIndex.value - 1 + videoCount) % videoCount
         } else {
@@ -148,63 +152,13 @@ class ClothingViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    fun addProduct(product: ClothingItem) {
-        // Validar el producto antes de agregarlo
-        validateProduct(product)
 
-        // Si el producto tiene imagen por defecto, asignar la imagen predeterminada según la categoría
-        val productWithImage = if (product.imageUrl == "default_product" || product.imageUrl.isBlank()) {
-            product.copy(imageUrl = getDefaultImageForCategory(product.category))
-        } else {
-            product
-        }
-
-        val success = productRepository.addProduct(productWithImage)
-        if (!success) {
-            throw IllegalArgumentException("Ya existe un producto con ID: ${product.id}")
-        }
-
-        // Actualizar el estado local
-        loadProductsFromRepository()
-        loadFeaturedProducts() // Actualizar productos destacados
-    }
-
-    fun removeProduct(productId: String) {
-        // Validar que el productId no esté vacío
-        if (productId.isBlank()) {
-            throw IllegalArgumentException("ID de producto inválido")
-        }
-
-        val success = productRepository.deleteProduct(productId)
-        if (!success) {
-            throw IllegalArgumentException("No existe un producto con ID: $productId")
-        }
-
-        // Actualizar el estado local
-        loadProductsFromRepository()
-        loadFeaturedProducts() // Actualizar productos destacados
-    }
-
-    fun updateProduct(updatedProduct: ClothingItem) {
-        // Validar el producto antes de actualizarlo
-        validateProduct(updatedProduct)
-
-        val success = productRepository.updateProduct(updatedProduct)
-        if (!success) {
-            throw IllegalArgumentException("No existe un producto con ID: ${updatedProduct.id}")
-        }
-
-        // Actualizar el estado local
-        loadProductsFromRepository()
-        loadFeaturedProducts() // Actualizar productos destacados
-    }
 
     fun generateNextProductId(): String {
         val maxId = _products.value.mapNotNull { it.id.toIntOrNull() }.maxOrNull() ?: 0
         return (maxId + 1).toString()
     }
 
-    // Función para obtener imagen predeterminada según la categoría
     fun getDefaultImageForCategory(category: ProductType): String {
         return when (category) {
             ProductType.POLERAS -> "satorupolera"
@@ -213,79 +167,5 @@ class ClothingViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    // Función para validar productos antes de agregar o actualizar
-    private fun validateProduct(product: ClothingItem) {
-        // Validación de ID no vacío
-        if (product.id.isBlank()) {
-            throw IllegalArgumentException("El ID del producto no puede estar vacío")
-        }
 
-        // Validación de stock negativo
-        if (product.stock < 0) {
-            throw IllegalArgumentException("El stock no puede ser negativo. Stock actual: ${product.stock}")
-        }
-
-        // Validación de precio negativo
-        if (product.price < 0.0) {
-            throw IllegalArgumentException("El precio no puede ser negativo. Precio actual: $${String.format("%.0f", product.price)}")
-        }
-
-        // Validación de precio mínimo (15,000 CLP)
-        if (product.price < 15000.0) {
-            throw IllegalArgumentException("El precio mínimo debe ser $15,000 CLP. Precio actual: $${String.format("%.0f", product.price)}")
-        }
-
-        // Validación de nombre no vacío
-        if (product.name.isBlank()) {
-            throw IllegalArgumentException("El nombre del producto no puede estar vacío")
-        }
-
-        // Validación de longitud del nombre
-        if (product.name.length > 100) {
-            throw IllegalArgumentException("El nombre del producto no puede exceder 100 caracteres")
-        }
-
-        // Validación de descripción no vacía
-        if (product.description.isBlank()) {
-            throw IllegalArgumentException("La descripción del producto no puede estar vacía")
-        }
-
-        // Validación de longitud de la descripción
-        if (product.description.length > 500) {
-            throw IllegalArgumentException("La descripción del producto no puede exceder 500 caracteres")
-        }
-
-        // Validación de tallas/medidas para cuadros
-        if (product.category == ProductType.CUADROS) {
-            if (product.sizes.isEmpty()) {
-                throw IllegalArgumentException("Los cuadros deben tener al menos una medida especificada")
-            }
-            // Verificar que las medidas sean válidas para cuadros
-            val validMeasures = listOf("30x39", "40x50", "50x70", "70x81")
-            product.sizes.forEach { size ->
-                if (!validMeasures.contains(size)) {
-                    throw IllegalArgumentException("Medida inválida para cuadros: $size. Medidas válidas: ${validMeasures.joinToString(", ")}")
-                }
-            }
-        } else {
-            // Para poleras y polerones, verificar tallas válidas
-            val validSizes = listOf("XS", "S", "M", "L", "XL", "XXL")
-            product.sizes.forEach { size ->
-                if (!validSizes.contains(size)) {
-                    throw IllegalArgumentException("Talla inválida: $size. Tallas válidas: ${validSizes.joinToString(", ")}")
-                }
-            }
-        }
-
-        // Validación de URL de imagen
-        if (product.imageUrl.isNotBlank() && product.imageUrl != "default_product") {
-            // Verificar que no contenga caracteres especiales peligrosos
-            val invalidChars = listOf("<", ">", "\"", "'", "&")
-            invalidChars.forEach { char ->
-                if (product.imageUrl.contains(char)) {
-                    throw IllegalArgumentException("La URL de la imagen contiene caracteres inválidos")
-                }
-            }
-        }
-    }
 }

@@ -180,13 +180,13 @@ fun ReportScreen(
 
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "Agregar Nuevo Producto",
+                        text = "Vista Previa - Agregar Producto",
                         color = Color.White,
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = "Completa la información del producto que deseas agregar al inventario",
+                        text = "Esta función es solo visual - no se agregan productos realmente",
                         color = Color.White.copy(alpha = 0.9f),
                         fontSize = 13.sp
                     )
@@ -827,8 +827,8 @@ fun ReportScreen(
                                 stock = finalStock
                             )
 
-                            // Agregar al ViewModel (ya tiene validaciones internas)
-                            clothingViewModel.addProduct(newProduct)
+                            // Sistema de productos ahora es solo visual - no se agregan realmente
+                            // clothingViewModel.addProduct(newProduct) // Comentado para que sea solo visual
                             onReportSubmitted()
                         } catch (e: Exception) {
                             // En caso de error, no hacer nada (las validaciones del ViewModel ya manejan los errores)
@@ -853,7 +853,7 @@ fun ReportScreen(
                 ) {
                     Icon(
                         Icons.Default.Add,
-                        contentDescription = "Agregar Producto",
+                        contentDescription = "Vista Previa - Agregar Producto",
                         tint = Color.White,
                         modifier = Modifier.size(32.dp)
                     )

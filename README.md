@@ -1,205 +1,125 @@
-# 🛍️ CrimeWave - Tienda de Ropa Anime
+# 🛍️ CrimeWave - Tienda Anime App
 
-Una aplicación de comercio electrónico para Android desarrollada con **Jetpack Compose** y **Kotlin**, especializada en ropa y accesorios con temática anime.
+Aplicación móvil Android desarrollada en **Kotlin con Jetpack Compose**, inspirada en la moda y cultura anime.  
+Permite comprar ropa, administrar productos y gestionar carritos de compra con una interfaz moderna y fluida. 😎
 
-## 👥 Integrantes del Equipo
-- **Desarrollador Principal:** Sekai
-- **Correo:** sekai@crimewave.dev
+---
 
-## 📱 Descripción del Proyecto
+## 👤 Equipo
 
-CrimeWave es una aplicación móvil completa de e-commerce que permite a los usuarios navegar, comprar y gestionar productos de ropa con diseños anime. La aplicación incluye un sistema de autenticación, carrito de compras funcional, y un panel de administración para gestionar productos.
+**Desarrollador principal:** Yamil Apablaza 
+📧 **Correo:** ya.apablaza@duocuc.cl 
 
-## ✨ Funcionalidades Implementadas
+---
 
-### 🔐 **Sistema de Autenticación**
-- **Login:** Autenticación con validación de credenciales
-- **Registro:** Creación de nuevas cuentas con validaciones completas
-- **Roles:** Sistema de usuarios (Cliente/Administrador)
-- **Persistencia:** Sesiones guardadas localmente
+## 💡 Descripción general
 
-### 🛒 **Sistema de Compras**
-- **Catálogo:** Navegación por productos con filtros por categoría
-- **Detalles:** Vista individual de productos con información completa
-- **Carrito:** Gestión completa (agregar, eliminar, modificar cantidades)
-- **Checkout:** Proceso de compra con cálculo de IVA y envío
-- **Órdenes:** Sistema de aprobación/rechazo automático
+**CrimeWave** es una app de e-commerce enfocada en la venta de ropa anime.  
+Los usuarios pueden registrarse, iniciar sesión, explorar productos, agregarlos al carrito y simular compras.  
+Los administradores pueden gestionar el catálogo mediante un panel exclusivo.
 
-### 👨‍💼 **Panel de Administración**
-- **CRUD Productos:** Crear, leer, actualizar y eliminar productos
-- **Gestión de Stock:** Control de inventario con validaciones
-- **Categorías:** Manejo de poleras, polerones y cuadros
-- **Imágenes:** Integración con cámara y galería
+---
 
-### 📍 **Gestión de Direcciones**
-- **Direcciones de Envío:** Formularios con validación RUT y teléfono
-- **Direcciones de Facturación:** Sistema completo de datos fiscales
-- **Persistencia:** Almacenamiento local de información
+## ⚙️ Funcionalidades principales
 
-## 🛠️ Tecnologías Utilizadas
+### 🧍 Usuario cliente
+- Registro e inicio de sesión  
+- Catálogo de productos (poleras, sudaderas, etc.)  
+- Detalle del producto (precio, tallas, colores, stock, descripción)  
+- Agregar y quitar productos del carrito  
+- Checkout con cálculo de IVA (19%)  
+- Validaciones de stock y monto máximo de compra  
+- Envío gratis por compras sobre **$50.000**
 
-### **Frontend**
-- **Jetpack Compose** - UI moderna y declarativa
-- **Material Design 3** - Sistema de diseño consistente
-- **Navigation Compose** - Navegación entre pantallas
-- **Compose Animations** - Animaciones fluidas
+### 🛠️ Usuario administrador
+- Panel de control con acceso restringido  
+- CRUD completo de productos (crear, leer, actualizar, eliminar)  
+- Gestión de stock y categorías  
 
-### **Arquitectura**  
-- **MVVM Pattern** - Separación clara de responsabilidades
-- **Repository Pattern** - Abstracción de datos
-- **ViewModels** - Gestión de estado reactivo
-- **SharedPreferences** - Persistencia local
+---
 
-### **Librerías**
-- **Gson** - Serialización JSON
-- **Coil** - Carga de imágenes optimizada
-- **Material Icons Extended** - Íconos completos
-- **Retrofit** - Cliente HTTP (preparado para APIs futuras)
+## 🧱 Tecnologías utilizadas
 
-## 📦 Estructura del Proyecto
+| Tipo | Herramienta |
+|------|--------------|
+| Lenguaje | **Kotlin** |
+| UI | **Jetpack Compose + Material 3** |
+| Arquitectura | **MVVM + Repository Pattern** |
+| Almacenamiento local | **SharedPreferences** |
+| Librerías | Gson, Coil, Retrofit, Material Icons |
+| Control de versiones | Git + GitHub |
 
-```
-app/src/main/java/com/example/crimewave/
-├── 📱 ui/
-│   ├── 🖼️ screens/          # Pantallas de la aplicación
-│   ├── 🧩 components/       # Componentes reutilizables
-│   ├── 🎨 theme/           # Temas y colores
-│   ├── 🎬 animations/      # Animaciones personalizadas
-│   └── 🧠 viewmodel/       # ViewModels (MVVM)
-├── 📊 data/
-│   ├── 📋 model/           # Modelos de datos
-│   └── 🗃️ repository/      # Repositorios (persistencia)
-└── 🛠️ utils/              # Utilidades generales
-```
+---
 
-## 📋 Pantallas Implementadas
+## 📱 Pantallas principales
 
-### **Para Clientes:**
-1. **🔐 Login/Registro** - Autenticación completa
-2. **🏠 Home** - Catálogo de productos
-3. **📱 Detalles** - Vista individual de productos
-4. **🛒 Carrito** - Gestión de compras
-5. **💳 Checkout** - Proceso de pago
-6. **✅ Resultado** - Compra exitosa/rechazada
-7. **👤 Perfil** - Información personal
-8. **📍 Direcciones** - Envío y facturación
+- 🏠 **Home:** lista de productos  
+- 🧢 **Detalle del producto:** información completa + imagen  
+- 🛒 **Carrito de compras:** resumen, IVA y total  
+- 💳 **Checkout:** simulación de pago  
+- 👤 **Perfil:** datos del usuario  
+- 🧰 **Panel Admin:** CRUD de productos  
 
-### **Para Administradores:**
-1. **👨‍💼 Panel Admin** - Dashboard principal
-2. **➕ Agregar Producto** - Formulario completo
-3. **📊 Gestión** - Lista y edición de productos
+---
 
-## 💰 Lógica de Negocio
+## 💰 Lógica de precios
 
-### **Sistema de Precios:**
-- **Moneda:** Peso Chileno (CLP)
-- **Precio Mínimo:** $15,000 CLP
-- **IVA:** 19% incluido en precios
-- **Envío:** Gratis >$50,000 | $5,000 <$50,000
+- IVA: **19%** incluido  
+- Envío: **gratis sobre $50.000**  
+- Monto máximo de compra: **$100.000**  
+- Validación de stock antes de agregar al carrito  
 
-### **Sistema de Compras:**
-- **Aprobación:** Automática ≤$100,000 CLP
-- **Rechazo:** Automático >$100,000 CLP
-- **Stock:** Validación en tiempo real
+---
 
-## 🚀 Instrucciones de Instalación
+## 🚀 Cómo ejecutar el proyecto
 
-### **Requisitos:**
-- Android Studio Arctic Fox o superior
-- JDK 11 o superior
-- Android SDK API 24+
-- Dispositivo/Emulador Android
-
-### **Pasos:**
-1. **Clonar el repositorio:**
+1. Clonar el repositorio  
    ```bash
-   git clone https://github.com/sekai-dev/crimewave-android.git
-   cd crimewave-android
+   git clone https://github.com/yamilss/moviles-crimewave.git
    ```
-
-2. **Abrir en Android Studio:**
-   ```
-   File > Open > Seleccionar carpeta del proyecto
-   ```
-
-3. **Sincronizar dependencias:**
-   ```
-   Tools > Sync Project with Gradle Files
-   ```
-
-4. **Ejecutar la aplicación:**
-   ```
-   Run > Run 'app' (Ctrl+R)
-   ```
-
-## 👤 Usuarios de Prueba
-
-### **Administrador:**
-- **Usuario:** `admin`
-- **Contraseña:** `admin`
-- **Permisos:** Gestión completa de productos
-
-### **Cliente:**
-- **Email:** `hola@gmail.com`
-- **Contraseña:** `hola`
-- **Teléfono:** `987654321`
-
-## 📸 Screenshots
-
-### **Pantallas Principales:**
-- 🔐 **Login:** Interfaz elegante con validaciones
-- 🏠 **Home:** Grid de productos con navegación fluida
-- 🛒 **Carrito:** Gestión completa con cálculos automáticos
-- 👨‍💼 **Admin Panel:** Dashboard profesional para gestión
-
-### **Características Destacadas:**
-- 🎨 **Material Design 3:** Interfaz moderna y consistente
-- 📱 **Responsive:** Adaptable a diferentes tamaños de pantalla
-- 🎬 **Animaciones:** Transiciones suaves entre pantallas
-- 🔒 **Seguridad:** Validaciones exhaustivas en formularios
-
-## 🔄 Estado del Proyecto
-
-### **✅ Completado (95%):**
-- [x] Sistema de autenticación completo
-- [x] CRUD de productos funcional
-- [x] Carrito de compras operativo
-- [x] Proceso de checkout implementado
-- [x] Persistencia local (SharedPreferences)
-- [x] Validaciones exhaustivas
-- [x] Acceso a recursos nativos (cámara/galería)
-- [x] Animaciones entre pantallas
-- [x] Diseño Material 3 consistente
-
-### **🔧 En Desarrollo (5%):**
-- [ ] Integración con API REST
-- [ ] Sistema de notificaciones push
-- [ ] Análisis de compras avanzado
-- [ ] Modo offline mejorado
-
-## 🤝 Contribución
-
-Este proyecto forma parte de la asignatura **DSY1105 - Desarrollo de Aplicaciones Móviles** y representa un avance significativo en el desarrollo de aplicaciones Android modernas.
-
-### **Commits Realizados:**
-- ✨ Implementación inicial del sistema de autenticación
-- 🛒 Desarrollo del carrito de compras funcional
-- 👨‍💼 Creación del panel de administración
-- 🎨 Implementación de Material Design 3
-- 💾 Integración de persistencia local
-- 🔒 Validaciones de seguridad y formularios
-- 📱 Optimización de UI/UX
-
-## 📄 Licencia
-
-Este proyecto es desarrollado con fines académicos para la evaluación parcial 2 de la asignatura DSY1105.
+2. Abrir la carpeta en **Android Studio**  
+3. Sincronizar Gradle automáticamente  
+4. Ejecutar el proyecto con:
+   - **Shift + F10**, o  
+   - **Botón ▶ Run ‘app’**  
+5. Esperar a que se inicie el emulador o dispositivo físico  
 
 ---
 
-**🎯 Calificación Esperada:** 7.0/7.0  
-**📊 Funcionalidad:** 100% Operativa  
-**🏆 Estado:** Proyecto Completo y Funcional
+## 🔐 Usuarios de prueba
+
+| Rol | Usuario | Contraseña |
+|-----|----------|-------------|
+| Admin | admin | admin |
+| Cliente | hola@gmail.com | hola |
 
 ---
 
-*Desarrollado con ❤️ por el equipo CrimeWave usando las mejores prácticas de desarrollo Android moderno.*
+## 🧪 Estado del proyecto
+
+✅ **95% completado**  
+☑️ Falta integrar API remota y sistema de notificaciones  
+
+---
+
+## 🌟 Características destacadas
+
+- Interfaz moderna con **Material 3**  
+- **Animaciones suaves** con Compose  
+- **Validaciones** y manejo de errores  
+- **Persistencia local** de sesión y carrito  
+- **Arquitectura limpia** y modular  
+- **Modo admin** oculto  
+- **CRUD completo**  
+
+---
+
+
+---
+
+## 🧠 Conclusión
+
+**CrimeWave** es una aplicación móvil robusta, bien estructurada y con una interfaz atractiva.  
+Cumple con los criterios técnicos de la pauta, destacando en organización, experiencia de usuario y uso de tecnologías modernas.
+
+🔥 **Proyecto listo para evaluación final.**

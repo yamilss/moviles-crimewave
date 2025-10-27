@@ -140,7 +140,6 @@ fun EmployeePanelScreen(
                 confirmButton = {
                     TextButton(
                         onClick = {
-                            clothingViewModel.removeProduct(product.id)
                             showDeleteDialog = null
                         }
                     ) {
@@ -188,9 +187,6 @@ fun EmployeePanelScreen(
                 confirmButton = {
                     TextButton(
                         onClick = {
-                            val price = newPrice.toDoubleOrNull() ?: product.price
-                            val stock = newStock.toIntOrNull() ?: product.stock
-                            clothingViewModel.updateProduct(product.copy(price = price, stock = stock))
                             showEditDialog = null
                         }
                     ) {
