@@ -24,17 +24,20 @@ data class ClothingItem(
                     // Si hay algunas imágenes pero menos de 3, completar con variaciones
                     val result = imageUrls.toMutableList()
                     while (result.size < 3) {
-                        result.add("${imageUrl}_${result.size + 1}")
+                        when (result.size) {
+                            1 -> result.add("placeholder1")
+                            2 -> result.add("placerholder2")
+                        }
                     }
                     result.take(3)
                 }
                 imageUrl.isNotBlank() -> {
                     // Generate 3 images from the main imageUrl for backward compatibility
-                    listOf(imageUrl, "${imageUrl}_2", "${imageUrl}_3")
+                    listOf(imageUrl, "placeholder1", "placerholder2")
                 }
                 else -> {
                     // Fallback completo
-                    listOf("default_product", "default_product_2", "default_product_3")
+                    listOf("default_product", "placeholder1", "placerholder2")
                 }
             }
         } catch (e: Exception) {
