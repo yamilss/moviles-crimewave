@@ -33,7 +33,7 @@ class UserRepository(context: Context) {
                 isAdmin = true
             ),
             User(
-                email = "hola@gmail.com",
+                email = "hola",
                 password = "hola",
                 phoneNumber = "987654321",
                 isAdmin = false

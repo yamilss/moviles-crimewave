@@ -55,13 +55,21 @@ fun ProductImage(
 private fun getImageResource(imageUrl: String): Int {
     return when (imageUrl) {
         "satorupolera" -> com.example.crimewave.R.drawable.satorupolera
+        "satoru" -> com.example.crimewave.R.drawable.satoru
+        "satorupolera3" -> com.example.crimewave.R.drawable.satorupolera3
         "togahoodie" -> com.example.crimewave.R.drawable.togahoodie
+        "himiko2" -> com.example.crimewave.R.drawable.himiko2
+        "himiko3" -> com.example.crimewave.R.drawable.himiko3
         "givencuadro" -> com.example.crimewave.R.drawable.givencuadro
+        "given2" -> com.example.crimewave.R.drawable.given2
+        "given3" -> com.example.crimewave.R.drawable.given3
         "polerongojo" -> com.example.crimewave.R.drawable.polerongojo
         "logocrimewave" -> com.example.crimewave.R.drawable.logocrimewave
         "bolsaanime" -> com.example.crimewave.R.drawable.bolsaanime
         "makima" -> com.example.crimewave.R.drawable.makima
         "power" -> com.example.crimewave.R.drawable.power
+        "placeholder1" -> com.example.crimewave.R.drawable.placeholder1
+        "placerholder2" -> com.example.crimewave.R.drawable.placerholder2
         else -> com.example.crimewave.R.drawable.satorupolera // imagen por defecto
     }
 }

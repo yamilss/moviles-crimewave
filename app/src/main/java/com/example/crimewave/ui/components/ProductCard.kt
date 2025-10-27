@@ -2,6 +2,8 @@ package com.example.crimewave.ui.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -30,26 +32,33 @@ fun ProductCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         shape = RoundedCornerShape(12.dp)
     ) {
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .padding(16.dp)
         ) {
-            // Imagen del producto
-            ProductImage(
-                imageUrl = product.imageUrl,
-                contentDescription = product.name,
+
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier
-                    .size(80.dp)
-                    .clip(RoundedCornerShape(8.dp))
-            )
+                    .fillMaxWidth()
+                    .height(120.dp)
+            ) {
+                items(product.allImages) { image ->
+                    ProductImage(
+                        imageUrl = image,
+                        contentDescription = product.name,
+                        modifier = Modifier
+                            .width(120.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                    )
+                }
+            }
 
-            Spacer(modifier = Modifier.width(16.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
-            // Información del producto
             Column(
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
                     text = product.name,
@@ -71,7 +80,6 @@ fun ProductCard(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // Precio
                 Text(
                     text = NumberFormat.getCurrencyInstance(Locale("es", "CL"))
                         .format(product.price),
@@ -81,7 +89,6 @@ fun ProductCard(
                     fontSize = 18.sp
                 )
 
-                // Mostrar si es nuevo
                 if (product.isNew) {
                     Spacer(modifier = Modifier.height(4.dp))
                     Surface(

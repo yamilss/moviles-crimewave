@@ -35,7 +35,7 @@ class ProductRepository(context: Context) {
                 description = "Diseño original de Satoru Gojo del anime Jujutsu Kaisen",
                 price = 22000.0,
                 imageUrl = "satorupolera",
-                imageUrls = listOf("satorupolera", "togahoodie", "placerholder2"),
+                imageUrls = listOf("satorupolera", "satoru", "satorupolera3"),
                 category = ProductType.POLERAS,
                 isNew = true,
                 sizes = listOf("S", "M", "L", "XL")
@@ -46,7 +46,7 @@ class ProductRepository(context: Context) {
                 description = "Polerón con diseño de Himiko Toga del anime My Hero Academia",
                 price = 42000.0,
                 imageUrl = "togahoodie",
-                imageUrls = listOf("togahoodie", "placeholder1", "placerholder2"),
+                imageUrls = listOf("togahoodie", "himiko2", "himiko3"),
                 category = ProductType.POLERONES,
                 isNew = true,
                 isFeatured = true,
@@ -58,7 +58,7 @@ class ProductRepository(context: Context) {
                 description = "Cuadro decorativo minimalista con diseño del anime Given",
                 price = 45000.0,
                 imageUrl = "givencuadro",
-                imageUrls = listOf("givencuadro", "placeholder1", "placerholder2"),
+                imageUrls = listOf("givencuadro", "given2", "given3"),
                 category = ProductType.CUADROS,
                 isNew = true,
                 sizes = listOf("30x39", "40x50", "50x70", "70x81")
@@ -133,5 +133,11 @@ class ProductRepository(context: Context) {
 
     fun getNewProducts(): List<ClothingItem> {
         return getProducts().filter { it.isNew }
+    }
+
+    private fun clearProducts() {
+        val editor = sharedPreferences.edit()
+        editor.remove(KEY_PRODUCTS)
+        editor.apply()
     }
 }
