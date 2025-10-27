@@ -18,15 +18,15 @@ class CartRepository(context: Context) {
         private const val MAX_ORDER_HISTORY = 20
     }
 
-    // Variable para almacenar el email del usuario actual
+    
     private var currentUserEmail: String? = null
 
-    // Función para establecer el usuario actual
+    
     fun setCurrentUser(email: String?) {
         currentUserEmail = email
     }
 
-    // Función para obtener la clave específica del usuario
+    
     private fun getUserKey(baseKey: String): String {
         return if (currentUserEmail != null) {
             "${baseKey}_${currentUserEmail}"
@@ -36,7 +36,7 @@ class CartRepository(context: Context) {
     }
 
     fun getCart(): Cart {
-        // Si no hay usuario establecido, devolver carrito vacío
+        
         if (currentUserEmail == null) {
             return Cart()
         }
@@ -52,7 +52,7 @@ class CartRepository(context: Context) {
     }
 
     private fun saveCart(cart: Cart) {
-        // Solo guardar si hay usuario establecido
+        
         if (currentUserEmail != null) {
             val json = gson.toJson(cart.items)
             sharedPreferences.edit()
@@ -65,19 +65,19 @@ class CartRepository(context: Context) {
         val currentCart = getCart()
         val currentItems = currentCart.items.toMutableList()
 
-        // Verificar si el item ya existe en el carrito
+       
         val existingItemIndex = currentItems.indexOfFirst {
             it.clothingItem.id == cartItem.clothingItem.id && it.selectedSize == cartItem.selectedSize
         }
 
         if (existingItemIndex >= 0) {
-            // Si existe, actualizar la cantidad
+            
             val existingItem = currentItems[existingItemIndex]
             currentItems[existingItemIndex] = existingItem.copy(
                 quantity = existingItem.quantity + cartItem.quantity
             )
         } else {
-            // Si no existe, agregar nuevo item
+            
             currentItems.add(cartItem)
         }
 
@@ -112,13 +112,13 @@ class CartRepository(context: Context) {
 
     fun saveLastOrder(order: Order) {
         if (currentUserEmail != null) {
-            // Guardar la última orden
+            
             val orderJson = gson.toJson(order)
             sharedPreferences.edit()
                 .putString(getUserKey(KEY_LAST_ORDER), orderJson)
                 .commit()
 
-            // Agregar al historial
+            
             addToOrderHistory(order)
         }
     }
@@ -139,15 +139,15 @@ class CartRepository(context: Context) {
 
         val currentHistory = getOrderHistory().toMutableList()
 
-        // Agregar la nueva orden al principio
+       
         currentHistory.add(0, order)
 
-        // Mantener solo las últimas 20 órdenes
+       
         if (currentHistory.size > MAX_ORDER_HISTORY) {
             currentHistory.removeAt(currentHistory.size - 1)
         }
 
-        // Guardar el historial actualizado
+        
         val historyJson = gson.toJson(currentHistory)
         sharedPreferences.edit()
             .putString(getUserKey(KEY_ORDER_HISTORY), historyJson)

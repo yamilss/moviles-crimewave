@@ -17,7 +17,7 @@ fun ProductImage(
     contentScale: ContentScale = ContentScale.Crop
 ) {
     if (imageUrl.startsWith("/")) {
-        // Es una ruta de archivo personalizado
+        
         var bitmap by remember(imageUrl) { mutableStateOf(ImageUtils.getBitmapFromPath(imageUrl)) }
 
         LaunchedEffect(imageUrl) {
@@ -32,7 +32,7 @@ fun ProductImage(
                 contentScale = contentScale
             )
         } ?: run {
-            // Si no se puede cargar la imagen personalizada, mostrar una por defecto
+            
             Image(
                 painter = painterResource(id = com.example.crimewave.R.drawable.satorupolera),
                 contentDescription = contentDescription,
@@ -41,7 +41,7 @@ fun ProductImage(
             )
         }
     } else {
-        // Es un recurso predeterminado
+        
         val resourceId = getImageResource(imageUrl)
         Image(
             painter = painterResource(id = resourceId),

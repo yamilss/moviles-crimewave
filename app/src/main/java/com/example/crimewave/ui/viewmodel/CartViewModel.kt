@@ -20,34 +20,33 @@ class CartViewModel(application: Application) : AndroidViewModel(application) {
     private var currentUser: User? = null
 
     init {
-        // El carrito se iniciará vacío hasta que se establezca un usuario
-        _cartState.value = Cart()
+        _cartState.value = getSampleCart()
         _lastOrder.value = null
     }
 
-    // Función para establecer el usuario actual y cargar su carrito
     fun setCurrentUser(user: User?) {
         currentUser = user
         if (user != null && !user.isAdmin) {
-            // Solo los clientes (no admins) tienen carrito
             cartRepository.setCurrentUser(user.email)
             _cartState.value = cartRepository.getCart()
             _lastOrder.value = cartRepository.getLastOrder()
+        } else if (user != null && user.isAdmin) {
+            cartRepository.setCurrentUser(null)
+            _cartState.value = getSampleCart()
+            _lastOrder.value = null
         } else {
-            // Limpiar carrito para admin o usuario nulo
             cartRepository.setCurrentUser(null)
             _cartState.value = Cart()
             _lastOrder.value = null
         }
     }
 
-    // Función para verificar si el usuario actual puede usar el carrito
     private fun canUseCart(): Boolean {
         return currentUser != null && !currentUser!!.isAdmin
     }
 
     fun addToCart(clothingItem: ClothingItem, selectedSize: String, quantity: Int = 1) {
-        if (!canUseCart()) return
+        if (!canUseCart()) return 
 
         val cartItem = CartItem(
             id = "${clothingItem.id}_${selectedSize}_${System.currentTimeMillis()}",
@@ -61,14 +60,14 @@ class CartViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun removeFromCart(cartItemId: String) {
-        if (!canUseCart()) return
+        if (!canUseCart()) return 
 
         cartRepository.removeItemFromCart(cartItemId)
         _cartState.value = cartRepository.getCart()
     }
 
     fun updateQuantity(cartItemId: String, newQuantity: Int) {
-        if (!canUseCart()) return
+        if (!canUseCart()) return 
 
         if (newQuantity <= 0) {
             removeFromCart(cartItemId)
@@ -80,7 +79,7 @@ class CartViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun clearCart() {
-        if (!canUseCart()) return
+        if (!canUseCart()) return 
 
         cartRepository.clearCart()
         _cartState.value = Cart()
@@ -88,7 +87,6 @@ class CartViewModel(application: Application) : AndroidViewModel(application) {
 
     fun checkout(): Order {
         if (!canUseCart()) {
-            // Retornar orden vacía si no puede usar carrito
             return Order(
                 id = "INVALID_ORDER",
                 items = emptyList(),
@@ -101,7 +99,6 @@ class CartViewModel(application: Application) : AndroidViewModel(application) {
         val cart = _cartState.value
         val totalAmount = cart.totalAmount
 
-        // Rechazar SOLO si el monto supera los 100,000 CLP
         val status = if (totalAmount > 100000) {
             OrderStatus.REJECTED
         } else {
@@ -121,7 +118,6 @@ class CartViewModel(application: Application) : AndroidViewModel(application) {
         _lastOrder.value = order
         cartRepository.saveLastOrder(order)
 
-        // Si la orden fue aprobada, limpiar el carrito
         if (status == OrderStatus.APPROVED) {
             clearCart()
         }
@@ -133,6 +129,43 @@ class CartViewModel(application: Application) : AndroidViewModel(application) {
 
     fun getCartTotal(): Double = if (canUseCart()) _cartState.value.totalAmount else 0.0
 
-    // Función para verificar si el usuario actual es admin
     fun isCurrentUserAdmin(): Boolean = currentUser?.isAdmin ?: false
+
+    private fun getSampleCart(): Cart {
+        val sampleItems = listOf(
+            CartItem(
+                id = "sample_1",
+                clothingItem = ClothingItem(
+                    id = "polera_1",
+                    name = "Polera Básica",
+                    description = "Polera cómoda de algodón 100%",
+                    price = 15000.0,
+                    imageUrl = "polera_basica",
+                    imageUrls = listOf("polera_basica", "polera_basica_2", "polera_basica_3"),
+                    category = ProductType.POLERAS,
+                    sizes = listOf("S", "M", "L", "XL"),
+                    stock = 5
+                ),
+                quantity = 2,
+                selectedSize = "M"
+            ),
+            CartItem(
+                id = "sample_2",
+                clothingItem = ClothingItem(
+                    id = "poleron_1",
+                    name = "Polerón con Capucha",
+                    description = "Polerón abrigado con capucha",
+                    price = 35000.0,
+                    imageUrl = "poleron_capucha",
+                    imageUrls = listOf("poleron_capucha", "poleron_capucha_2", "poleron_capucha_3"),
+                    category = ProductType.POLERONES,
+                    sizes = listOf("S", "M", "L", "XL"),
+                    stock = 3
+                ),
+                quantity = 1,
+                selectedSize = "L"
+            )
+        )
+        return Cart(items = sampleItems)
+    }
 }

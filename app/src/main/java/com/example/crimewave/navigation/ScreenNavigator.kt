@@ -9,9 +9,7 @@ import com.example.crimewave.ui.viewmodel.AuthViewModel
 import com.example.crimewave.ui.viewmodel.CartViewModel
 import com.example.crimewave.ui.viewmodel.ClothingViewModel
 
-/**
- * Navegador principal que maneja la navegación entre pantallas
- */
+
 @Composable
 fun ScreenNavigator(
     navigationState: NavigationState,
@@ -22,7 +20,7 @@ fun ScreenNavigator(
     isAuthenticated: Boolean,
     currentUser: User?
 ) {
-    // Validar que exista un id seleccionado válido para la pantalla de detalles
+    
     if (navigationState.currentScreen == Routes.DETAILS && navigationState.selectedItemId.isBlank()) {
         navigationActions.navigateToHome()
         return
@@ -200,7 +198,7 @@ fun ScreenNavigator(
             }
 
             else -> {
-                // Pantalla desconocida - redirigir a home por seguridad
+                
                 if (isAuthenticated) {
                     navigationActions.navigateToHome()
                 } else {

@@ -91,14 +91,10 @@ Los administradores pueden gestionar el catálogo mediante un panel exclusivo.
 | Rol | Usuario | Contraseña |
 |-----|----------|-------------|
 | Admin | admin | admin |
-| Cliente | hola@gmail.com | hola |
+| Cliente | hola | hola |
 
 ---
 
-## 🧪 Estado del proyecto
-
-✅ **95% completado**  
-☑️ Falta integrar API remota y sistema de notificaciones  
 
 ---
 
@@ -117,9 +113,6 @@ Los administradores pueden gestionar el catálogo mediante un panel exclusivo.
 
 ---
 
-## 🧠 Conclusión
-
 **CrimeWave** es una aplicación móvil robusta, bien estructurada y con una interfaz atractiva.  
 Cumple con los criterios técnicos de la pauta, destacando en organización, experiencia de usuario y uso de tecnologías modernas.
 
-🔥 **Proyecto listo para evaluación final.**

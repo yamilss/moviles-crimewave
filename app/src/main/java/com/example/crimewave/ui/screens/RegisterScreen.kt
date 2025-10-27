@@ -40,19 +40,16 @@ fun RegisterScreen(
     var confirmPassword by remember { mutableStateOf("") }
     val authState by authViewModel.authState
 
-    // Manejar botón de retroceso
     BackHandler {
         onBackPressed()
     }
 
-    // Validaciones en tiempo real
     val isValidEmail = email.trim().isNotBlank() && android.util.Patterns.EMAIL_ADDRESS.matcher(email.trim()).matches()
     val isValidPhone = phoneNumber.length == 9 && phoneNumber.all { it.isDigit() }
     val isValidPassword = password.length >= 4
     val passwordsMatch = password == confirmPassword
     val isValidForm = isValidEmail && isValidPhone && isValidPassword && passwordsMatch
 
-    // Efectos secundarios para manejar el éxito del registro
     LaunchedEffect(authState.isAuthenticated) {
         if (authState.isAuthenticated) {
             onRegisterSuccess()
@@ -86,7 +83,6 @@ fun RegisterScreen(
                 modifier = Modifier.padding(32.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Imagen de logo arriba del título
                 Image(
                     painter = painterResource(id = R.drawable.logodefault2),
                     contentDescription = "crimewave banner",
@@ -97,7 +93,6 @@ fun RegisterScreen(
                     contentScale = ContentScale.Fit
                 )
 
-                // Título
                 Text(
                     text = "CREAR UNA\nCUENTA SIGMA",
                     color = Color.White,
@@ -107,7 +102,6 @@ fun RegisterScreen(
                     modifier = Modifier.padding(bottom = 24.dp)
                 )
 
-                // Línea decorativa
                 Box(
                     modifier = Modifier
                         .width(200.dp)
@@ -126,7 +120,6 @@ fun RegisterScreen(
 
                 Spacer(modifier = Modifier.height(32.dp))
 
-                // Campo E-mail
                 Column {
                     Text(
                         text = "E-mail*",
@@ -156,7 +149,6 @@ fun RegisterScreen(
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                // Campo Número
                 Column {
                     Text(
                         text = "Número (9 dígitos)",
@@ -188,7 +180,6 @@ fun RegisterScreen(
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                // Campo Contraseña
                 Column {
                     Text(
                         text = "Contraseña",
@@ -219,7 +210,6 @@ fun RegisterScreen(
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                // Campo Confirmar Contraseña
                 Column {
                     Text(
                         text = "Confirmar Contraseña",
@@ -250,7 +240,6 @@ fun RegisterScreen(
 
                 Spacer(modifier = Modifier.height(32.dp))
 
-                // Botón REGISTRARSE
                 Button(
                     onClick = {
                         if (isValidForm) {
@@ -296,7 +285,6 @@ fun RegisterScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // Error message
                 authState.error?.let { error ->
                     Text(
                         text = error,
@@ -307,7 +295,6 @@ fun RegisterScreen(
                     )
                 }
 
-                // Enlace de login
                 Row {
                     Text(
                         text = "¿Ya tienes cuenta? Inicia sesión ",

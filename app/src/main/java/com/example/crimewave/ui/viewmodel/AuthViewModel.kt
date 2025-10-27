@@ -17,10 +17,8 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
     val authState: State<AuthState> = _authState
 
     init {
-        // Asegurar que existan usuarios por defecto
         userRepository.forceReinitializeUsers()
 
-        // Siempre empezar en estado no autenticado para mostrar login
         _authState.value = AuthState(
             isAuthenticated = false,
             currentUser = null,
@@ -29,7 +27,6 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun login(email: String, password: String) {
-        // Limpiar error previo
         _authState.value = _authState.value.copy(error = null)
 
         if (email.isBlank() || password.isBlank()) {
@@ -37,7 +34,6 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
             return
         }
 
-        // Buscar usuario
         val user = userRepository.authenticateUser(email.trim(), password.trim())
 
         if (user != null) {
@@ -55,7 +51,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun register(email: String, phoneNumber: String, password: String, confirmPassword: String) {
-        // Validaciones
+        
         if (email.isBlank() || phoneNumber.isBlank() || password.isBlank() || confirmPassword.isBlank()) {
             _authState.value = _authState.value.copy(error = "Por favor complete todos los campos")
             return
@@ -81,7 +77,6 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
             return
         }
 
-        // Crear nuevo usuario
         val newUser = User(
             email = email,
             password = password,
@@ -89,11 +84,9 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
             isAdmin = false
         )
 
-        // Intentar registrar el usuario
         val success = userRepository.registerUser(newUser)
 
         if (success) {
-            // Auto-login después del registro
             userRepository.saveCurrentUser(newUser)
             _authState.value = AuthState(
                 isAuthenticated = true,
@@ -125,13 +118,11 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
     ): Boolean {
         val currentUser = _authState.value.currentUser ?: return false
 
-        // Verificar contraseña actual
         if (currentPassword.isBlank() || currentUser.password != currentPassword) {
             _authState.value = _authState.value.copy(error = "Contraseña actual incorrecta")
             return false
         }
 
-        // Validar nuevo teléfono si se proporciona
         if (!newPhone.isNullOrBlank()) {
             if (newPhone.length != 9 || !newPhone.all { it.isDigit() }) {
                 _authState.value = _authState.value.copy(error = "El número debe tener 9 dígitos")
@@ -139,7 +130,6 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
 
-        // Validar nueva contraseña si se proporciona
         if (!newPassword.isNullOrBlank()) {
             if (newPassword.length < 4) {
                 _authState.value = _authState.value.copy(error = "La contraseña debe tener al menos 4 caracteres")
@@ -147,16 +137,14 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
 
-        // Crear usuario actualizado
+        
         val updatedUser = currentUser.copy(
             phoneNumber = newPhone?.takeIf { it.isNotBlank() } ?: currentUser.phoneNumber,
             password = newPassword?.takeIf { it.isNotBlank() } ?: currentUser.password
         )
 
-        // Actualizar en el repositorio
         userRepository.updateUser(updatedUser)
 
-        // Actualizar el usuario actual en la sesión
         _authState.value = _authState.value.copy(
             currentUser = updatedUser,
             error = null
@@ -179,7 +167,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
     ): Boolean {
         val currentUser = _authState.value.currentUser ?: return false
 
-        // Validaciones
+        
         if (nombre.isBlank() || apellidos.isBlank() || direccion.isBlank() ||
             rut.isBlank() || ciudad.isBlank() || codigoPostal.isBlank() ||
             pais.isBlank() || region.isBlank() || celular.isBlank()) {
@@ -187,13 +175,11 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
             return false
         }
 
-        // Validar celular de 9 dígitos
         if (celular.length != 9 || !celular.all { it.isDigit() }) {
             _authState.value = _authState.value.copy(error = "El celular debe tener exactamente 9 dígitos")
             return false
         }
 
-        // Validar RUT (exactamente 9 dígitos numéricos, igual que el celular)
         if (rut.length != 9 || !rut.all { it.isDigit() }) {
             _authState.value = _authState.value.copy(error = "El RUT debe tener exactamente 9 dígitos")
             return false
@@ -214,10 +200,8 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
 
         val updatedUser = currentUser.copy(shippingAddress = shippingAddress)
 
-        // Actualizar en el repositorio
         userRepository.updateUser(updatedUser)
 
-        // Actualizar el usuario actual en la sesión
         _authState.value = _authState.value.copy(currentUser = updatedUser)
 
         return true
@@ -237,7 +221,6 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
     ): Boolean {
         val currentUser = _authState.value.currentUser ?: return false
 
-        // Validaciones
         if (nombre.isBlank() || apellidos.isBlank() || direccion.isBlank() ||
             rut.isBlank() || ciudad.isBlank() || codigoPostal.isBlank() ||
             pais.isBlank() || region.isBlank() || celular.isBlank()) {
@@ -245,13 +228,11 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
             return false
         }
 
-        // Validar celular de 9 dígitos
         if (celular.length != 9 || !celular.all { it.isDigit() }) {
             _authState.value = _authState.value.copy(error = "El celular debe tener exactamente 9 dígitos")
             return false
         }
 
-        // Validar RUT (exactamente 9 dígitos numéricos, igual que el celular)
         if (rut.length != 9 || !rut.all { it.isDigit() }) {
             _authState.value = _authState.value.copy(error = "El RUT debe tener exactamente 9 dígitos")
             return false
@@ -272,10 +253,8 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
 
         val updatedUser = currentUser.copy(billingAddress = billingAddress)
 
-        // Actualizar en el repositorio
         userRepository.updateUser(updatedUser)
 
-        // Actualizar el usuario actual en la sesión
         _authState.value = _authState.value.copy(currentUser = updatedUser)
 
         return true
@@ -285,10 +264,8 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
         val currentUser = _authState.value.currentUser ?: return false
         val updatedUser = currentUser.copy(shippingAddress = null)
 
-        // Actualizar en el repositorio
         userRepository.updateUser(updatedUser)
 
-        // Actualizar el usuario actual en la sesión
         _authState.value = _authState.value.copy(currentUser = updatedUser)
         return true
     }
@@ -299,25 +276,20 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
         val currentUser = _authState.value.currentUser ?: return false
         val updatedUser = currentUser.copy(billingAddress = null)
 
-        // Actualizar en el repositorio
         userRepository.updateUser(updatedUser)
 
-        // Actualizar el usuario actual en la sesión
         _authState.value = _authState.value.copy(currentUser = updatedUser)
         return true
     }
 
-    // Función para reinicializar usuarios predeterminados (útil para debugging)
     fun reinitializeUsers() {
         userRepository.forceReinitializeUsers()
     }
 
-    // Función para obtener la lista de usuarios registrados (para debugging)
     fun getRegisteredUsers(): List<User> {
         return userRepository.getRegisteredUsers()
     }
 
-    // Función para verificar si un usuario existe
     fun userExists(email: String): Boolean {
         return userRepository.getRegisteredUsers().any { it.email == email }
     }

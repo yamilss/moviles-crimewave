@@ -59,12 +59,10 @@ fun ReportScreen(
     var sizeQuantity by remember { mutableStateOf("1") }
     var selectedSizes by remember { mutableStateOf(mutableMapOf<String, Int>()) }
 
-    // Variables para imagen
     var selectedImagePath by remember { mutableStateOf<String?>(null) }
     var showImageDialog by remember { mutableStateOf(false) }
     var photoUri by remember { mutableStateOf<Uri?>(null) }
 
-    // Launcher para galería
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
@@ -78,7 +76,6 @@ fun ReportScreen(
         }
     }
 
-    // Launcher para cámara
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture()
     ) { success: Boolean ->
@@ -94,19 +91,16 @@ fun ReportScreen(
         }
     }
 
-    // Launcher para permisos de cámara
     val cameraPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
         if (isGranted) {
-            // Crear archivo temporal para la foto
             val photoFile = ImageUtils.createImageFile(context)
             photoUri = ImageUtils.getUriForFile(context, photoFile)
             cameraLauncher.launch(photoUri)
         }
     }
 
-    // Listas de tallas/medidas según la categoría
     val availableOptions = remember(selectedCategory) {
         when (selectedCategory) {
             ProductType.CUADROS -> listOf("30x39", "40x50", "50x70", "70x81")
@@ -114,14 +108,12 @@ fun ReportScreen(
         }
     }
 
-    // Resetear selección cuando cambia la categoría
     LaunchedEffect(selectedCategory) {
         selectedSizes.clear()
         selectedSize = availableOptions.first()
     }
     var selectedImage by remember { mutableStateOf<String?>(null) }
 
-    // Validaciones
     val isValidPrice = price.toDoubleOrNull()?.let { it >= 15000 } ?: false
     val isValidStock = stock.toIntOrNull()?.let { it >= 0 } ?: false
     val isValidSizeQuantity = sizeQuantity.toIntOrNull()?.let { it > 0 } ?: false
@@ -138,7 +130,6 @@ fun ReportScreen(
                 )
             )
     ) {
-        // Header azul con gradiente
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -197,7 +188,6 @@ fun ReportScreen(
             }
         }
 
-        // Banner informativo con gradiente
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -230,7 +220,6 @@ fun ReportScreen(
             }
         }
 
-        // Formulario principal
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -238,12 +227,10 @@ fun ReportScreen(
                 .padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            // Fila 1: Nombre del Producto y Precio
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // Nombre del Producto
                 Column(modifier = Modifier.weight(1f)) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -288,7 +275,7 @@ fun ReportScreen(
                     }
                 }
 
-                // Precio
+                
                 Column(modifier = Modifier.weight(1f)) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -311,7 +298,6 @@ fun ReportScreen(
                         OutlinedTextField(
                             value = price,
                             onValueChange = { newPrice ->
-                                // Solo permitir números
                                 if (newPrice.all { it.isDigit() || it == '.' }) {
                                     price = newPrice
                                 }
@@ -339,7 +325,6 @@ fun ReportScreen(
                 }
             }
 
-            // Fila 2: Categoría y Stock Total
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -411,7 +396,6 @@ fun ReportScreen(
                     }
                 }
 
-                // Stock Total
                 Column(modifier = Modifier.weight(1f)) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -439,7 +423,6 @@ fun ReportScreen(
                         OutlinedTextField(
                             value = stock,
                             onValueChange = { newStock ->
-                                // Solo permitir números enteros no negativos
                                 if (newStock.all { it.isDigit() } && (newStock.isEmpty() || newStock.toIntOrNull() != null)) {
                                     stock = newStock
                                 }
@@ -467,7 +450,6 @@ fun ReportScreen(
                 }
             }
 
-            // Descripción
             Column(modifier = Modifier.fillMaxWidth()) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -513,7 +495,6 @@ fun ReportScreen(
                 }
             }
 
-            // Tallas y Cantidades
             Column(modifier = Modifier.fillMaxWidth()) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -588,7 +569,6 @@ fun ReportScreen(
                         OutlinedTextField(
                             value = sizeQuantity,
                             onValueChange = { newQuantity ->
-                                // Solo permitir números enteros positivos
                                 if (newQuantity.all { it.isDigit() } && (newQuantity.isEmpty() || newQuantity.toIntOrNull()?.let { it > 0 } == true)) {
                                     sizeQuantity = newQuantity
                                 } else if (newQuantity.isEmpty()) {
@@ -617,7 +597,7 @@ fun ReportScreen(
                                     selectedSizes = selectedSizes.toMutableMap().apply {
                                         this[selectedSize] = quantity
                                     }
-                                    sizeQuantity = "1" // Reset quantity field
+                                    sizeQuantity = "1" 
                                 }
                             },
                             colors = ButtonDefaults.buttonColors(
@@ -639,7 +619,6 @@ fun ReportScreen(
                         }
                     }
 
-                    // Mostrar tallas seleccionadas
                     if (selectedSizes.isNotEmpty()) {
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
@@ -687,7 +666,6 @@ fun ReportScreen(
                 }
             }
 
-            // Imagen del Producto
             Column(modifier = Modifier.fillMaxWidth()) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -768,7 +746,6 @@ fun ReportScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Botones de acción
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -794,26 +771,23 @@ fun ReportScreen(
                 Button(
                     onClick = {
                         try {
-                            // Validaciones adicionales antes de crear el producto
                             val finalPrice = price.toDoubleOrNull()
                             val finalStock = stock.toIntOrNull() ?: 10
 
                             if (finalPrice == null || finalPrice < 15000) {
-                                return@Button // No crear el producto si el precio es inválido
+                                return@Button
                             }
 
                             if (finalStock < 0) {
-                                return@Button // No crear el producto si el stock es negativo
+                                return@Button 
                             }
 
-                            // Determinar qué imagen usar
                             val productImageUrl = selectedImagePath ?: when (selectedCategory) {
                                 ProductType.POLERAS -> "satorupolera"
                                 ProductType.POLERONES -> "togahoodie"
                                 ProductType.CUADROS -> "givencuadro"
                             }
 
-                            // Crear nuevo producto
                             val newProduct = ClothingItem(
                                 id = clothingViewModel.generateNextProductId(),
                                 name = productName.trim(),
@@ -827,11 +801,8 @@ fun ReportScreen(
                                 stock = finalStock
                             )
 
-                            // Sistema de productos ahora es solo visual - no se agregan realmente
-                            // clothingViewModel.addProduct(newProduct) // Comentado para que sea solo visual
                             onReportSubmitted()
                         } catch (e: Exception) {
-                            // En caso de error, no hacer nada (las validaciones del ViewModel ya manejan los errores)
                             return@Button
                         }
                     },
@@ -864,7 +835,6 @@ fun ReportScreen(
         }
     }
 
-    // Diálogo para seleccionar imagen
     if (showImageDialog) {
         AlertDialog(
             onDismissRequest = { showImageDialog = false },
@@ -877,23 +847,19 @@ fun ReportScreen(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // Botones principales
                     Button(
                         onClick = {
                             showImageDialog = false
-                            // Verificar permisos de cámara
                             when (PackageManager.PERMISSION_GRANTED) {
                                 ContextCompat.checkSelfPermission(
                                     context,
                                     Manifest.permission.CAMERA
                                 ) -> {
-                                    // Permiso otorgado, abrir cámara
                                     val photoFile = ImageUtils.createImageFile(context)
                                     photoUri = ImageUtils.getUriForFile(context, photoFile)
                                     cameraLauncher.launch(photoUri)
                                 }
                                 else -> {
-                                    // Solicitar permiso
                                     cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
                                 }
                             }
@@ -938,7 +904,7 @@ fun ReportScreen(
                     OutlinedButton(
                         onClick = {
                             showImageDialog = false
-                            selectedImagePath = null // Usará imagen por defecto
+                            selectedImagePath = null 
                         },
                         modifier = Modifier
                             .fillMaxWidth()
@@ -949,7 +915,6 @@ fun ReportScreen(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // Botón Cancelar centrado
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.Center

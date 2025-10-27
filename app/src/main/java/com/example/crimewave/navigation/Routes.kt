@@ -1,8 +1,6 @@
 package com.example.crimewave.navigation
 
-/**
- * Constantes para las rutas de navegación de la aplicación
- */
+
 object Routes {
     // Pantallas de autenticación
     const val LOGIN = "login"

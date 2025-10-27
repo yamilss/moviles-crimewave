@@ -29,7 +29,6 @@ fun OrderResultScreen(
     val lastOrder by cartViewModel.lastOrder
     val isAdmin = cartViewModel.isCurrentUserAdmin()
 
-    // Si es admin, redirigir automáticamente al home
     if (isAdmin) {
         LaunchedEffect(Unit) {
             onNavigateToHome()
@@ -52,7 +51,7 @@ fun OrderResultScreen(
             )
         }
         else -> {
-            // Fallback en caso de error
+            
             ErrorScreen(onNavigateToHome = onNavigateToHome)
         }
     }
@@ -82,7 +81,7 @@ fun OrderSuccessScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             item {
-                // Icono de éxito
+                
                 Card(
                     modifier = Modifier.size(120.dp),
                     colors = CardDefaults.cardColors(
@@ -123,7 +122,7 @@ fun OrderSuccessScreen(
             }
 
             item {
-                // Detalles del pedido
+                
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
@@ -212,7 +211,7 @@ fun OrderSuccessScreen(
             }
 
             item {
-                // Información de entrega
+                
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(
@@ -296,7 +295,7 @@ fun OrderRejectedScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            // Icono de error
+        
             Card(
                 modifier = Modifier.size(120.dp),
                 colors = CardDefaults.cardColors(
@@ -405,7 +404,7 @@ fun OrderRejectedScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Botones de acción
+            
             Column(
                 modifier = Modifier.fillMaxWidth()
             ) {

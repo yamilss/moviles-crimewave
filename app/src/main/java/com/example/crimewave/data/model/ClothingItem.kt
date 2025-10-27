@@ -5,8 +5,8 @@ data class ClothingItem(
     val name: String,
     val description: String,
     val price: Double,
-    val imageUrl: String, // Main image for backward compatibility
-    val imageUrls: List<String> = emptyList(), // Multiple images, empty by default for backward compatibility
+    val imageUrl: String, 
+    val imageUrls: List<String> = emptyList(), 
     val category: ProductType,
     val isNew: Boolean = false,
     val isFeatured: Boolean = false,
@@ -15,13 +15,13 @@ data class ClothingItem(
     val stock: Int = 10,
     val reviewCount: Int = 0
 ) {
-    // Helper property to ensure we always have at least one image
+    
     val allImages: List<String>
         get() = try {
             when {
                 imageUrls.isNotEmpty() && imageUrls.size >= 3 -> imageUrls.take(3)
                 imageUrls.isNotEmpty() -> {
-                    // Si hay algunas imágenes pero menos de 3, completar con variaciones
+                    
                     val result = imageUrls.toMutableList()
                     while (result.size < 3) {
                         when (result.size) {
@@ -32,16 +32,16 @@ data class ClothingItem(
                     result.take(3)
                 }
                 imageUrl.isNotBlank() -> {
-                    // Generate 3 images from the main imageUrl for backward compatibility
+                   
                     listOf(imageUrl, "placeholder1", "placerholder2")
                 }
                 else -> {
-                    // Fallback completo
+                    
                     listOf("default_product", "placeholder1", "placerholder2")
                 }
             }
         } catch (e: Exception) {
-            // En caso de cualquier error, usar fallback seguro
+            
             listOf("default_product", "default_product_2", "default_product_3")
         }
 }

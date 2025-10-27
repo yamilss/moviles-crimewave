@@ -133,7 +133,7 @@ class ClothingViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun navigateVideo(direction: String) {
-        val videoCount = 5
+        val videoCount = 5 
         if (direction == "left") {
             _currentVideoIndex.value = (_currentVideoIndex.value - 1 + videoCount) % videoCount
         } else {
@@ -152,7 +152,20 @@ class ClothingViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
+    fun addProduct(product: ClothingItem) {
+        // Sistema de productos es solo visual - no se agregan realmente
+        return
+    }
 
+    fun removeProduct(productId: String) {
+        // Sistema de productos es solo visual - no se eliminan realmente
+        return
+    }
+
+    fun updateProduct(updatedProduct: ClothingItem) {
+        // Sistema de productos es solo visual - no se actualizan realmente
+        return
+    }
 
     fun generateNextProductId(): String {
         val maxId = _products.value.mapNotNull { it.id.toIntOrNull() }.maxOrNull() ?: 0
@@ -167,5 +180,65 @@ class ClothingViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
+    private fun validateProduct(product: ClothingItem) {
+        if (product.id.isBlank()) {
+            throw IllegalArgumentException("El ID del producto no puede estar vacío")
+        }
 
+        if (product.stock < 0) {
+            throw IllegalArgumentException("El stock no puede ser negativo. Stock actual: ${product.stock}")
+        }
+
+        if (product.price < 0.0) {
+            throw IllegalArgumentException("El precio no puede ser negativo. Precio actual: $${String.format("%.0f", product.price)}")
+        }
+
+        if (product.price < 15000.0) {
+            throw IllegalArgumentException("El precio mínimo debe ser $15,000 CLP. Precio actual: $${String.format("%.0f", product.price)}")
+        }
+
+        if (product.name.isBlank()) {
+            throw IllegalArgumentException("El nombre del producto no puede estar vacío")
+        }
+
+        if (product.name.length > 100) {
+            throw IllegalArgumentException("El nombre del producto no puede exceder 100 caracteres")
+        }
+
+        if (product.description.isBlank()) {
+            throw IllegalArgumentException("La descripción del producto no puede estar vacía")
+        }
+
+        if (product.description.length > 500) {
+            throw IllegalArgumentException("La descripción del producto no puede exceder 500 caracteres")
+        }
+
+        if (product.category == ProductType.CUADROS) {
+            if (product.sizes.isEmpty()) {
+                throw IllegalArgumentException("Los cuadros deben tener al menos una medida especificada")
+            }
+            val validMeasures = listOf("30x39", "40x50", "50x70", "70x81")
+            product.sizes.forEach { size ->
+                if (!validMeasures.contains(size)) {
+                    throw IllegalArgumentException("Medida inválida para cuadros: $size. Medidas válidas: ${validMeasures.joinToString(", ")}")
+                }
+            }
+        } else {
+            val validSizes = listOf("XS", "S", "M", "L", "XL", "XXL")
+            product.sizes.forEach { size ->
+                if (!validSizes.contains(size)) {
+                    throw IllegalArgumentException("Talla inválida: $size. Tallas válidas: ${validSizes.joinToString(", ")}")
+                }
+            }
+        }
+
+        if (product.imageUrl.isNotBlank() && product.imageUrl != "default_product") {
+            val invalidChars = listOf("<", ">", "\"", "'", "&")
+            invalidChars.forEach { char ->
+                if (product.imageUrl.contains(char)) {
+                    throw IllegalArgumentException("La URL de la imagen contiene caracteres inválidos")
+                }
+            }
+        }
+    }
 }

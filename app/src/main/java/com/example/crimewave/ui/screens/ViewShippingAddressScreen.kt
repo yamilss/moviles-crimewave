@@ -35,7 +35,6 @@ fun ViewShippingAddressScreen(
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
-        // Header
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -54,7 +53,6 @@ fun ViewShippingAddressScreen(
             }
         }
 
-        // Título
         Column(
             modifier = Modifier.padding(horizontal = 24.dp)
         ) {
@@ -68,7 +66,6 @@ fun ViewShippingAddressScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             if (shippingAddress != null) {
-                // Mostrar dirección guardada
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(containerColor = Color(0xFFF8F9FA)),
@@ -78,7 +75,6 @@ fun ViewShippingAddressScreen(
                     Column(
                         modifier = Modifier.padding(20.dp)
                     ) {
-                        // Header de la dirección
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
@@ -109,7 +105,6 @@ fun ViewShippingAddressScreen(
 
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        // Información de la dirección
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween
@@ -219,7 +214,6 @@ fun ViewShippingAddressScreen(
 
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        // Botones de acción
                         Row(
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
@@ -258,7 +252,6 @@ fun ViewShippingAddressScreen(
                     }
                 }
             } else {
-                // No hay direcciones guardadas
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(containerColor = Color(0xFFF8F9FA)),
@@ -288,7 +281,6 @@ fun ViewShippingAddressScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Botón agregar nueva (solo si no hay dirección guardada - máximo 1)
             if (shippingAddress == null) {
                 Button(
                     onClick = onNavigateToAdd,
@@ -310,7 +302,6 @@ fun ViewShippingAddressScreen(
         }
     }
 
-    // Diálogo de confirmación para eliminar
     if (showDeleteDialog) {
         AlertDialog(
             onDismissRequest = { showDeleteDialog = false },

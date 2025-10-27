@@ -37,7 +37,6 @@ fun DetailsScreen(
     onNavigateBack: () -> Unit,
     onNavigateToCart: () -> Unit
 ) {
-    // Obtener el producto real del ViewModel
     val products by clothingViewModel.products
     val selectedProduct = remember(itemId, products) {
         products.find { it.id == itemId } ?: ClothingItem(
@@ -82,7 +81,6 @@ fun DetailsScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Galería de imágenes del producto (3 imágenes)
             ProductImageGallery(
                 images = selectedProduct.allImages,
                 productName = selectedProduct.name,
@@ -91,7 +89,6 @@ fun DetailsScreen(
                     .height(300.dp)
             )
 
-            // Información principal del producto
             Card {
                 Column(
                     modifier = Modifier.padding(16.dp)
@@ -129,7 +126,6 @@ fun DetailsScreen(
                 }
             }
 
-            // Descripción del producto
             Card {
                 Column(
                     modifier = Modifier.padding(16.dp)
@@ -148,7 +144,6 @@ fun DetailsScreen(
                 }
             }
 
-            // Información del producto
             Card {
                 Column(
                     modifier = Modifier.padding(16.dp)
@@ -162,7 +157,6 @@ fun DetailsScreen(
 
                     ProductInfoRow("Categoría", getCategoryText(selectedProduct.category))
 
-                    // Sección de tallas/medidas seleccionables
                     if (selectedProduct.sizes.isNotEmpty() && selectedProduct.sizes != listOf("N/A")) {
                         Column {
                             Text(
@@ -186,7 +180,6 @@ fun DetailsScreen(
                                 }
                             }
 
-                            // Segunda fila si hay más de 4 tallas
                             if (selectedProduct.sizes.size > 4) {
                                 Spacer(modifier = Modifier.height(8.dp))
                                 Row(
@@ -201,7 +194,6 @@ fun DetailsScreen(
                                             modifier = Modifier.weight(1f)
                                         )
                                     }
-                                    // Espacios vacíos si no completan la fila
                                     repeat(4 - selectedProduct.sizes.drop(4).size) {
                                         Spacer(modifier = Modifier.weight(1f))
                                     }
@@ -215,7 +207,6 @@ fun DetailsScreen(
                 }
             }
 
-            // Acciones de compra
             Card {
                 Column(
                     modifier = Modifier.padding(16.dp)
@@ -227,13 +218,11 @@ fun DetailsScreen(
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
 
-                    // Botón "Agregar al Carrito" - funcional para clientes, visual para administradores
                     if (selectedProduct.stock > 0) {
                         Button(
                             onClick = {
                                 if (selectedSize.isNotEmpty()) {
                                     if (cartViewModel.isCurrentUserAdmin()) {
-                                        // Admin: solo mostrar mensaje visual
                                         coroutineScope.launch {
                                             snackbarHostState.showSnackbar(
                                                 message = "🔍 Vista previa para administrador: ${selectedProduct.name}",
@@ -241,7 +230,6 @@ fun DetailsScreen(
                                             )
                                         }
                                     } else {
-                                        // Cliente: agregar realmente al carrito
                                         cartViewModel.addToCart(selectedProduct, selectedSize)
                                         coroutineScope.launch {
                                             snackbarHostState.showSnackbar(
@@ -266,7 +254,6 @@ fun DetailsScreen(
                             )
                         }
                         
-                        // Mensaje informativo diferente según el tipo de usuario
                         if (cartViewModel.isCurrentUserAdmin()) {
                             Text(
                                 text = "* Los administradores ven vista previa - no agregan productos realmente",
@@ -276,7 +263,6 @@ fun DetailsScreen(
                             )
                         }
                         
-                        // Mensaje de error para talla/medida no seleccionada
                         if (selectedSize.isEmpty() && selectedProduct.sizes.isNotEmpty() && selectedProduct.sizes != listOf("N/A")) {
                             Text(
                                 text = if (selectedProduct.category == ProductType.CUADROS) "* Selecciona una medida" else "* Selecciona una talla",
@@ -286,7 +272,6 @@ fun DetailsScreen(
                             )
                         }
                     } else {
-                        // Sin stock
                         Button(
                             onClick = { },
                             modifier = Modifier.fillMaxWidth(),
@@ -298,7 +283,6 @@ fun DetailsScreen(
 
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    // Always show cart button for visual purposes
                     OutlinedButton(
                         onClick = onNavigateToCart,
                         modifier = Modifier.fillMaxWidth()
@@ -313,7 +297,6 @@ fun DetailsScreen(
                     }
                 }
             }
-            // Sección de reseñas
             Card(
                 modifier = Modifier.padding(16.dp)
             ) {
@@ -413,7 +396,6 @@ private fun ProductImageGallery(
     productName: String,
     modifier: Modifier = Modifier
 ) {
-    // Asegurar que siempre tengamos al menos una imagen válida
     val safeImages = if (images.isEmpty()) {
         listOf("default_product")
     } else {
@@ -424,13 +406,11 @@ private fun ProductImageGallery(
     val coroutineScope = rememberCoroutineScope()
     
     Column(modifier = modifier) {
-        // Card container para la galería
         Card(
             modifier = Modifier.fillMaxWidth(),
             elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
         ) {
             Box {
-                // Image pager - validar que tengamos imágenes válidas
                 if (safeImages.isNotEmpty()) {
                     HorizontalPager(
                         state = pagerState,
@@ -449,7 +429,6 @@ private fun ProductImageGallery(
                         )
                     }
                 } else {
-                    // Fallback: mostrar imagen por defecto
                     ProductImage(
                         imageUrl = "default_product",
                         contentDescription = productName,
@@ -461,7 +440,6 @@ private fun ProductImageGallery(
                     )
                 }
                 
-                // Botones de navegación (solo si hay múltiples imágenes)
                 if (safeImages.size > 1) {
                     // Botón anterior
                     if (pagerState.currentPage > 0) {
@@ -489,7 +467,6 @@ private fun ProductImageGallery(
                         }
                     }
                     
-                    // Botón siguiente
                     if (pagerState.currentPage < safeImages.size - 1) {
                         IconButton(
                             onClick = {
@@ -516,7 +493,6 @@ private fun ProductImageGallery(
                     }
                 }
                 
-                // Overlay con información de imagen actual (solo si hay múltiples imágenes)
                 if (safeImages.size > 1) {
                     Surface(
                         modifier = Modifier
@@ -538,7 +514,6 @@ private fun ProductImageGallery(
         
         Spacer(modifier = Modifier.height(12.dp))
         
-        // Page indicators mejorados - solo mostrar si hay más de una imagen
         if (safeImages.size > 1) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -559,7 +534,6 @@ private fun ProductImageGallery(
                 }
             }
             
-            // Texto instructivo
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = "Desliza para ver más imágenes",

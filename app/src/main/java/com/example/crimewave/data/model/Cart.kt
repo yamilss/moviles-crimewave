@@ -32,10 +32,10 @@ data class Cart(
         get() = if (subtotal >= SHIPPING_THRESHOLD) 0.0 else SHIPPING_FEE_VALUE
 
     val iva: Double
-        get() = subtotal - (subtotal / (1 + IVA_RATE)) // IVA incluido en el precio
+        get() = subtotal - (subtotal / (1 + IVA_RATE)) 
 
     val totalAmount: Double
-        get() = subtotal + shippingFee // El IVA ya está incluido en el precio
+        get() = subtotal + shippingFee 
 }
 
 enum class OrderStatus {

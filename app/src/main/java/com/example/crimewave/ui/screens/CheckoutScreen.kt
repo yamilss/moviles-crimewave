@@ -30,7 +30,6 @@ fun CheckoutScreen(
     var isProcessing by remember { mutableStateOf(false) }
     val isAdmin = cartViewModel.isCurrentUserAdmin()
 
-    // Si es admin, redirigir automáticamente
     if (isAdmin) {
         LaunchedEffect(Unit) {
             onNavigateBack()
@@ -57,29 +56,24 @@ fun CheckoutScreen(
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Resumen de la orden
             item {
                 OrderSummaryCard(cart = cartState)
             }
 
-            // Información de entrega
             item {
                 DeliveryInfoCard()
             }
 
-            // Información de pago
             item {
                 PaymentInfoCard()
             }
 
-            // Total y botón de confirmación
             item {
                 CheckoutSummaryCard(
                     cart = cartState,
                     isProcessing = isProcessing,
                     onConfirmOrder = {
                         isProcessing = true
-                        // Simular procesamiento
                         val order = cartViewModel.checkout()
                         isProcessing = false
                         onOrderProcessed()
@@ -254,7 +248,6 @@ fun CheckoutSummaryCard(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Subtotal
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -266,7 +259,6 @@ fun CheckoutSummaryCard(
                 )
             }
 
-            // Envío
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -282,7 +274,6 @@ fun CheckoutSummaryCard(
                 )
             }
 
-            // IVA incluido
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -301,7 +292,6 @@ fun CheckoutSummaryCard(
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
-            // Total
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween

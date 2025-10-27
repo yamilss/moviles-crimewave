@@ -18,7 +18,7 @@ class UserRepository(context: Context) {
     }
 
     init {
-        // Inicializar usuarios por defecto si no existen
+        
         if (getRegisteredUsers().isEmpty()) {
             initializeDefaultUsers()
         }
@@ -40,21 +40,21 @@ class UserRepository(context: Context) {
             )
         )
 
-        // Limpiar usuarios existentes y guardar los nuevos
+       
         sharedPreferences.edit().remove(KEY_USERS).commit()
         saveRegisteredUsers(defaultUsers)
     }
 
-    // Función para forzar la reinicialización de usuarios (útil para debugging)
+    
     fun forceReinitializeUsers() {
-        // Limpiar completamente el estado de autenticación
+        
         sharedPreferences.edit()
             .remove(KEY_USERS)
             .remove(KEY_CURRENT_USER)
             .putBoolean(KEY_IS_AUTHENTICATED, false)
             .commit()
 
-        // Reinicializar usuarios por defecto
+       
         initializeDefaultUsers()
     }
 
@@ -68,13 +68,13 @@ class UserRepository(context: Context) {
         val usersJson = gson.toJson(users)
         sharedPreferences.edit()
             .putString(KEY_USERS, usersJson)
-            .commit() // Usar commit() en lugar de apply() para sincronización inmediata
+            .commit() 
     }
 
     fun registerUser(user: User): Boolean {
         val currentUsers = getRegisteredUsers().toMutableList()
 
-        // Verificar si el usuario ya existe
+       
         if (currentUsers.any { it.email == user.email }) {
             return false
         }
@@ -82,7 +82,7 @@ class UserRepository(context: Context) {
         currentUsers.add(user)
         saveRegisteredUsers(currentUsers)
 
-        // Verificar que se guardó correctamente
+        
         val savedUsers = getRegisteredUsers()
         return savedUsers.any { it.email == user.email }
     }
@@ -115,7 +115,7 @@ class UserRepository(context: Context) {
         sharedPreferences.edit()
             .remove(KEY_CURRENT_USER)
             .putBoolean(KEY_IS_AUTHENTICATED, false)
-            .commit() // Usar commit() para sincronización inmediata
+            .commit() 
     }
 
     fun updateUser(updatedUser: User) {
@@ -126,14 +126,14 @@ class UserRepository(context: Context) {
             currentUsers[userIndex] = updatedUser
             saveRegisteredUsers(currentUsers)
 
-            // Si es el usuario actual, actualizar también la sesión
+            
             if (getCurrentUser()?.email == updatedUser.email) {
                 saveCurrentUser(updatedUser)
             }
         }
     }
 
-    // Función para verificar el estado de los datos (debugging)
+   
     fun getDataStatus(): String {
         val users = getRegisteredUsers()
         val currentUser = getCurrentUser()

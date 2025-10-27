@@ -21,7 +21,7 @@ class ProductRepository(context: Context) {
     }
 
     init {
-        // Inicializar productos por defecto si no existen
+        
         if (getProducts().isEmpty()) {
             initializeDefaultProducts()
         }
@@ -83,7 +83,7 @@ class ProductRepository(context: Context) {
     fun addProduct(product: ClothingItem): Boolean {
         val currentProducts = getProducts().toMutableList()
 
-        // Verificar si el producto ya existe
+        
         if (currentProducts.any { it.id == product.id }) {
             return false
         }

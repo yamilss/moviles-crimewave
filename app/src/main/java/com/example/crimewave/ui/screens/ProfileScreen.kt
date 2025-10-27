@@ -64,6 +64,7 @@ fun ProfileScreen(
                     modifier = Modifier.padding(24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+                    
                     Surface(
                         modifier = Modifier.size(80.dp),
                         shape = MaterialTheme.shapes.extraLarge,
@@ -80,7 +81,7 @@ fun ProfileScreen(
                             )
                             
                             Text(
-                                text = "😢",
+                                text = "",
                                 style = MaterialTheme.typography.headlineLarge
                             )
                         }
@@ -205,7 +206,7 @@ fun ProfileScreen(
                         Spacer(modifier = Modifier.height(8.dp))
 
                         OutlinedButton(
-                            onClick = { /* Ver inventario */ },
+                            onClick = { /* Ver inventario, de momento solo visual  */ },
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Text("Ver Inventario")

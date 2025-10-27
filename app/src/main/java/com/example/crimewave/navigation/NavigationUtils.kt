@@ -6,14 +6,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 
-/**
- * Utilidades para la navegación
- */
+
 object NavigationUtils {
     
-    /**
-     * Verifica si una pantalla requiere autenticación
-     */
+   
     fun requiresAuthentication(route: String): Boolean {
         return when (route) {
             Routes.LOGIN, Routes.REGISTER -> false
@@ -21,9 +17,7 @@ object NavigationUtils {
         }
     }
     
-    /**
-     * Verifica si una pantalla es solo para administradores
-     */
+  
     fun requiresAdmin(route: String): Boolean {
         return when (route) {
             Routes.STATS -> true
@@ -31,9 +25,7 @@ object NavigationUtils {
         }
     }
     
-    /**
-     * Obtiene el título de la pantalla
-     */
+  
     fun getScreenTitle(route: String): String {
         return when (route) {
             Routes.LOGIN -> "Iniciar Sesión"
@@ -57,9 +49,7 @@ object NavigationUtils {
     }
 }
 
-/**
- * Diálogo de confirmación para salir de la aplicación
- */
+
 @Composable
 fun ExitAppDialog(
     showDialog: Boolean,

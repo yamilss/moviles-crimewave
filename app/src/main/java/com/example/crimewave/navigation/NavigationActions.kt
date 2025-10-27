@@ -1,8 +1,6 @@
 package com.example.crimewave.navigation
 
-/**
- * Interfaz que define todas las acciones de navegación disponibles
- */
+
 interface NavigationActions {
     // Navegación básica
     fun navigateBack()
@@ -40,9 +38,7 @@ interface NavigationActions {
     fun hideExitDialog()
 }
 
-/**
- * Implementación de las acciones de navegación
- */
+
 class NavigationActionsImpl(
     private val navigationState: NavigationState,
     private val isAuthenticated: () -> Boolean

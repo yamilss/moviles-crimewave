@@ -4,9 +4,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 
-/**
- * Administrador del estado de navegación de la aplicación
- */
 class NavigationState {
     var currentScreen by mutableStateOf(Routes.LOGIN)
         private set
@@ -23,9 +20,7 @@ class NavigationState {
     var showExitDialog by mutableStateOf(false)
         private set
 
-    /**
-     * Navega a una nueva pantalla agregando la actual al historial
-     */
+
     fun navigateToScreen(screen: String) {
         if (currentScreen != screen) {
             navigationStack = navigationStack + currentScreen
@@ -34,9 +29,7 @@ class NavigationState {
         }
     }
 
-    /**
-     * Navega hacia atrás usando el historial
-     */
+
     fun navigateBack(isAuthenticated: Boolean, onShowExitDialog: () -> Unit) {
         when {
             navigationStack.isNotEmpty() -> {
@@ -61,45 +54,33 @@ class NavigationState {
         }
     }
 
-    /**
-     * Establece el ID del item seleccionado (para navegación a detalles)
-     */
+
     fun setSelectedItemId(itemId: String) {
         _selectedItemId = itemId
     }
 
-    /**
-     * Muestra el diálogo de salida
-     */
+   
     fun showExitDialog() {
         showExitDialog = true
     }
 
-    /**
-     * Oculta el diálogo de salida
-     */
+   
     fun hideExitDialog() {
         showExitDialog = false
     }
 
-    /**
-     * Navega directamente a una pantalla sin agregar al historial
-     */
+  
     fun navigateDirectly(screen: String) {
         previousScreen = currentScreen
         currentScreen = screen
     }
 
-    /**
-     * Limpia el historial de navegación
-     */
+
     fun clearNavigationStack() {
         navigationStack = emptyList()
     }
 
-    /**
-     * Restablece el estado de navegación (útil para logout)
-     */
+   
     fun reset() {
         navigationStack = emptyList()
         previousScreen = currentScreen

@@ -41,7 +41,6 @@ class ImageUtils {
                 val imageFile = File(file, "$fileName.jpg")
                 val outputStream = FileOutputStream(imageFile)
 
-                // Comprimir la imagen
                 bitmap.compress(Bitmap.CompressFormat.JPEG, 80, outputStream)
                 outputStream.flush()
                 outputStream.close()
@@ -59,7 +58,6 @@ class ImageUtils {
                 val bitmap = BitmapFactory.decodeStream(inputStream)
                 inputStream?.close()
 
-                // Redimensionar si es muy grande
                 if (bitmap.width > 1024 || bitmap.height > 1024) {
                     val ratio = minOf(1024.0 / bitmap.width, 1024.0 / bitmap.height)
                     val width = (bitmap.width * ratio).toInt()

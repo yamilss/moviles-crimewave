@@ -12,11 +12,11 @@ fun AnimatedScreenTransition(
     @Suppress("UNUSED_PARAMETER") previousScreen: String,
     content: @Composable () -> Unit
 ) {
-    // Animación de slide horizontal suave
+    
     AnimatedContent(
         targetState = targetScreen,
         transitionSpec = {
-            // Slide hacia la derecha para navegación hacia adelante
+            
             slideInHorizontally(
                 initialOffsetX = { fullWidth -> fullWidth },
                 animationSpec = tween(500, easing = FastOutSlowInEasing)
@@ -28,9 +28,8 @@ fun AnimatedScreenTransition(
         modifier = Modifier.fillMaxSize(),
         label = "slide_transition",
         content = { screenState ->
-            // screenState contiene el estado actual de la pantalla
-            // pero usamos content() directamente ya que maneja su propio estado
-            screenState // Usar el parámetro para evitar warning
+           
+            screenState 
             content()
         }
     )

@@ -57,7 +57,6 @@ fun EmployeePanelScreen(
                 .padding(innerPadding)
                 .padding(16.dp)
         ) {
-            // Estadísticas rápidas
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
@@ -86,7 +85,6 @@ fun EmployeePanelScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Lista de productos
             Card(
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -131,7 +129,6 @@ fun EmployeePanelScreen(
             }
         }
 
-        // Diálogo de confirmación para eliminar
         showDeleteDialog?.let { product ->
             AlertDialog(
                 onDismissRequest = { showDeleteDialog = null },
@@ -140,6 +137,7 @@ fun EmployeePanelScreen(
                 confirmButton = {
                     TextButton(
                         onClick = {
+                            clothingViewModel.removeProduct(product.id)
                             showDeleteDialog = null
                         }
                     ) {
@@ -154,7 +152,6 @@ fun EmployeePanelScreen(
             )
         }
 
-        // Diálogo para editar producto (simplificado)
         showEditDialog?.let { product ->
             var newPrice by remember { mutableStateOf(product.price.toString()) }
             var newStock by remember { mutableStateOf(product.stock.toString()) }
@@ -187,6 +184,9 @@ fun EmployeePanelScreen(
                 confirmButton = {
                     TextButton(
                         onClick = {
+                            val price = newPrice.toDoubleOrNull() ?: product.price
+                            val stock = newStock.toIntOrNull() ?: product.stock
+                            clothingViewModel.updateProduct(product.copy(price = price, stock = stock))
                             showEditDialog = null
                         }
                     ) {

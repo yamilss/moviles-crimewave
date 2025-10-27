@@ -18,24 +18,20 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-// Función para validar celular de 9 dígitos
 private fun validateCelular(celular: String): Boolean {
     return celular.length == 9 && celular.all { it.isDigit() }
 }
 
-// Función para validar RUT de 9 dígitos (idéntica al celular)
 private fun validateRut(rut: String): Boolean {
     return rut.length == 9 && rut.all { it.isDigit() }
 }
 
 
 
-// Función para validar nombre (solo letras y espacios)
 private fun validateName(name: String): Boolean {
     return name.isNotBlank() && name.all { it.isLetter() || it.isWhitespace() } && name.length <= 50
 }
 
-// Función para validar código postal
 private fun validatePostalCode(code: String): Boolean {
     return code.isNotBlank() && code.length <= 10 && code.all { it.isDigit() || it == '-' }
 }
@@ -62,14 +58,12 @@ fun ShippingAddressScreen(
     var regionExpanded by remember { mutableStateOf(false) }
     var showSuccessDialog by remember { mutableStateOf(false) }
 
-    // Validaciones en tiempo real
     val isValidCelular = celular.isEmpty() || validateCelular(celular)
     val isValidRut = rut.isEmpty() || validateRut(rut)
     val isValidNombre = validateName(nombre)
     val isValidApellidos = validateName(apellidos)
     val isValidCodigoPostal = codigoPostal.isEmpty() || validatePostalCode(codigoPostal)
 
-    // Validación completa del formulario
     val isFormValid = nombre.isNotBlank() && apellidos.isNotBlank() &&
                      direccion.isNotBlank() && rut.isNotBlank() &&
                      ciudad.isNotBlank() && region.isNotBlank() &&
@@ -78,7 +72,6 @@ fun ShippingAddressScreen(
 
     val authState by authViewModel.authState
 
-    // Cargar datos existentes si los hay
     LaunchedEffect(authState.currentUser?.shippingAddress) {
         authState.currentUser?.shippingAddress?.let { address ->
             nombre = address.nombre
@@ -120,7 +113,6 @@ fun ShippingAddressScreen(
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
-        // Header
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -139,7 +131,6 @@ fun ShippingAddressScreen(
             }
         }
 
-        // Título
         Column(
             modifier = Modifier.padding(horizontal = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -153,7 +144,6 @@ fun ShippingAddressScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Fila 1: Nombre y Apellidos
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -207,7 +197,6 @@ fun ShippingAddressScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Fila 2: Dirección y RUT
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -272,7 +261,6 @@ fun ShippingAddressScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Fila 3: Ciudad y Código Postal
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -326,7 +314,6 @@ fun ShippingAddressScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Fila 4: País y Región
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -426,7 +413,6 @@ fun ShippingAddressScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Fila 5: Celular y Rut (DNI)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -442,7 +428,6 @@ fun ShippingAddressScreen(
                     OutlinedTextField(
                         value = celular,
                         onValueChange = { newValue ->
-                            // Solo permitir números y máximo 9 dígitos
                             if (newValue.all { it.isDigit() } && newValue.length <= 9) {
                                 celular = newValue
                             }
@@ -468,7 +453,6 @@ fun ShippingAddressScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Instagram
             Column(modifier = Modifier.fillMaxWidth()) {
                 Text(
                     text = "INSTAGRAM",
@@ -494,13 +478,11 @@ fun ShippingAddressScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Botones
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
 
-                // Botón Confirmar
                 Button(
                     onClick = {
                         val success = authViewModel.saveShippingAddress(
@@ -546,7 +528,6 @@ fun ShippingAddressScreen(
         }
     }
 
-    // Diálogo de éxito
     if (showSuccessDialog) {
         AlertDialog(
             onDismissRequest = {

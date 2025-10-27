@@ -35,18 +35,15 @@ fun EditDetailsScreen(
     var errorMessage by remember { mutableStateOf<String?>(null) }
     val authState by authViewModel.authState
 
-    // Validaciones en tiempo real
     val isValidPhone = phone.isEmpty() || (phone.length == 9 && phone.all { it.isDigit() })
     val isValidNewPassword = newPassword.isEmpty() || newPassword.length >= 4
     val passwordsMatch = newPassword == confirmNewPassword
     val hasRequiredPassword = currentPassword.isNotBlank()
 
-    // Validación completa del formulario
     val isFormValid = hasRequiredPassword && isValidPhone && isValidNewPassword &&
                      (newPassword.isEmpty() || passwordsMatch) &&
                      (phone != currentPhone || newPassword.isNotBlank())
 
-    // Observar errores del ViewModel
     LaunchedEffect(authState.error) {
         authState.error?.let { error ->
             errorMessage = error
@@ -85,7 +82,6 @@ fun EditDetailsScreen(
                     modifier = Modifier.padding(32.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    // Título
                     Text(
                         text = "Edita tus datos",
                         fontSize = 24.sp,
@@ -94,7 +90,6 @@ fun EditDetailsScreen(
                         modifier = Modifier.padding(bottom = 32.dp)
                     )
 
-                    // Campo E-mail (solo lectura)
                     Column(
                         modifier = Modifier.fillMaxWidth()
                     ) {
@@ -108,7 +103,7 @@ fun EditDetailsScreen(
 
                         OutlinedTextField(
                             value = currentEmail,
-                            onValueChange = { /* No editable */ },
+                            onValueChange = {  },
                             modifier = Modifier.fillMaxWidth(),
                             enabled = false,
                             colors = OutlinedTextFieldDefaults.colors(
@@ -121,7 +116,6 @@ fun EditDetailsScreen(
 
                     Spacer(modifier = Modifier.height(20.dp))
 
-                    // Campo Teléfono
                     Column(
                         modifier = Modifier.fillMaxWidth()
                     ) {
@@ -153,7 +147,6 @@ fun EditDetailsScreen(
 
                     Spacer(modifier = Modifier.height(20.dp))
 
-                    // Campo Contraseña actual
                     Column(
                         modifier = Modifier.fillMaxWidth()
                     ) {
@@ -184,7 +177,6 @@ fun EditDetailsScreen(
 
                     Spacer(modifier = Modifier.height(20.dp))
 
-                    // Campo Nueva contraseña
                     Column(
                         modifier = Modifier.fillMaxWidth()
                     ) {
@@ -215,7 +207,6 @@ fun EditDetailsScreen(
 
                     Spacer(modifier = Modifier.height(20.dp))
 
-                    // Campo Confirmar nueva contraseña
                     Column(
                         modifier = Modifier.fillMaxWidth()
                     ) {
@@ -246,7 +237,6 @@ fun EditDetailsScreen(
 
                     Spacer(modifier = Modifier.height(32.dp))
 
-                    // Mensaje de error
                     errorMessage?.let { error ->
                         Text(
                             text = error,
@@ -256,22 +246,18 @@ fun EditDetailsScreen(
                         )
                     }
 
-                    // Botones
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
 
 
-                        // Botón Confirmar
                         Button(
                             onClick = {
                                 try {
-                                    // Limpiar errores previos
                                     errorMessage = null
                                     authViewModel.clearError()
 
-                                    // Validaciones adicionales
                                     if (!isValidPhone) {
                                         errorMessage = "El teléfono debe tener exactamente 9 dígitos"
                                         return@Button

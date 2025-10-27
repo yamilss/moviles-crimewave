@@ -37,28 +37,6 @@ fun CartScreen(
     val cartState by cartViewModel.cartState
     val isAdmin = cartViewModel.isCurrentUserAdmin()
 
-    // Si es admin, mostrar mensaje de acceso no autorizado
-    if (isAdmin) {
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = { Text("Carrito de Compras") },
-                    navigationIcon = {
-                        IconButton(onClick = onNavigateBack) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Atrás")
-                        }
-                    }
-                )
-            }
-        ) { paddingValues ->
-            AdminRestrictedContent(
-                onNavigateBack = onNavigateBack,
-                modifier = Modifier.padding(paddingValues)
-            )
-        }
-        return
-    }
-
     Scaffold(
         topBar = {
             TopAppBar(
@@ -72,16 +50,15 @@ fun CartScreen(
         }
     ) { paddingValues ->
         if (cartState.isEmpty) {
-            // Carrito vacío
             EmptyCartContent(
                 onNavigateBack = onNavigateBack,
                 modifier = Modifier.padding(paddingValues)
             )
         } else {
-            // Carrito con productos
             CartContent(
                 cart = cartState,
                 cartViewModel = cartViewModel,
+                isAdmin = isAdmin,
                 onNavigateToCheckout = onNavigateToCheckout,
                 modifier = Modifier.padding(paddingValues)
             )
@@ -141,13 +118,13 @@ fun EmptyCartContent(
 fun CartContent(
     cart: Cart,
     cartViewModel: CartViewModel,
+    isAdmin: Boolean,
     onNavigateToCheckout: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
         modifier = modifier.fillMaxSize()
     ) {
-        // Lista de productos
         LazyColumn(
             modifier = Modifier.weight(1f),
             contentPadding = PaddingValues(16.dp),
@@ -156,6 +133,7 @@ fun CartContent(
             items(cart.items) { cartItem ->
                 CartItemCard(
                     cartItem = cartItem,
+                    isAdmin = isAdmin,
                     onQuantityChange = { newQuantity ->
                         cartViewModel.updateQuantity(cartItem.id, newQuantity)
                     },
@@ -166,9 +144,9 @@ fun CartContent(
             }
         }
 
-        // Resumen del carrito y botón de checkout
         CartSummary(
             cart = cart,
+            isAdmin = isAdmin,
             onCheckout = onNavigateToCheckout
         )
     }
@@ -177,6 +155,7 @@ fun CartContent(
 @Composable
 fun CartItemCard(
     cartItem: CartItem,
+    isAdmin: Boolean,
     onQuantityChange: (Int) -> Unit,
     onRemove: () -> Unit
 ) {
@@ -190,7 +169,6 @@ fun CartItemCard(
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Imagen del producto
             ProductImage(
                 imageUrl = cartItem.clothingItem.imageUrl,
                 contentDescription = cartItem.clothingItem.name,
@@ -201,7 +179,6 @@ fun CartItemCard(
 
             Spacer(modifier = Modifier.width(16.dp))
 
-            // Información del producto
             Column(
                 modifier = Modifier.weight(1f)
             ) {
@@ -225,43 +202,56 @@ fun CartItemCard(
                 )
             }
 
-            // Controles de cantidad
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    IconButton(
-                        onClick = { onQuantityChange(cartItem.quantity - 1) },
-                        enabled = cartItem.quantity > 1
-                    ) {
-                        Icon(Icons.Default.Remove, contentDescription = "Disminuir")
-                    }
-
+                if (isAdmin) {
                     Text(
-                        text = cartItem.quantity.toString(),
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.padding(horizontal = 16.dp)
+                        text = "Cantidad: ${cartItem.quantity}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.Gray
                     )
-
-                    IconButton(
-                        onClick = { onQuantityChange(cartItem.quantity + 1) }
+                    
+                    Text(
+                        text = "(Solo visualización)",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.Gray
+                    )
+                } else {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(Icons.Default.Add, contentDescription = "Aumentar")
-                    }
-                }
+                        IconButton(
+                            onClick = { onQuantityChange(cartItem.quantity - 1) },
+                            enabled = cartItem.quantity > 1
+                        ) {
+                            Icon(Icons.Default.Remove, contentDescription = "Disminuir")
+                        }
 
-                TextButton(
-                    onClick = onRemove
-                ) {
-                    Icon(
-                        Icons.Default.Delete,
-                        contentDescription = "Eliminar",
-                        tint = Color.Red
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text("Eliminar", color = Color.Red)
+                        Text(
+                            text = cartItem.quantity.toString(),
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.padding(horizontal = 16.dp)
+                        )
+
+                        IconButton(
+                            onClick = { onQuantityChange(cartItem.quantity + 1) }
+                        ) {
+                            Icon(Icons.Default.Add, contentDescription = "Aumentar")
+                        }
+                    }
+
+                    TextButton(
+                        onClick = onRemove
+                    ) {
+                        Icon(
+                            Icons.Default.Delete,
+                            contentDescription = "Eliminar",
+                            tint = Color.Red
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text("Eliminar", color = Color.Red)
+                    }
                 }
             }
         }
@@ -271,6 +261,7 @@ fun CartItemCard(
 @Composable
 fun CartSummary(
     cart: Cart,
+    isAdmin: Boolean,
     onCheckout: () -> Unit
 ) {
     Card(
@@ -284,7 +275,6 @@ fun CartSummary(
                 .fillMaxWidth()
                 .padding(20.dp)
         ) {
-            // Subtotal
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -301,7 +291,6 @@ fun CartSummary(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Envío
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -319,7 +308,6 @@ fun CartSummary(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // IVA incluido
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -370,8 +358,20 @@ fun CartSummary(
                 )
             ) {
                 Text(
-                    text = "Proceder al pago",
+                    text = if (isAdmin) "Vista Previa - Proceder al pago" else "Proceder al pago",
                     style = MaterialTheme.typography.titleMedium
+                )
+            }
+            
+            if (isAdmin) {
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                Text(
+                    text = "* Los administradores ven una vista previa del carrito",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.Gray,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
         }

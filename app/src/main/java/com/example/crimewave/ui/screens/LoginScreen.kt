@@ -39,16 +39,16 @@ fun LoginScreen(
     var password by remember { mutableStateOf("") }
     val authState by authViewModel.authState
 
-    // Manejar botón de retroceso
+    
     BackHandler {
         onBackPressed()
     }
 
-    // Validaciones en tiempo real
+    
     val isValidForm = email.trim().isNotBlank() && password.trim().isNotBlank()
 
 
-    // Efectos secundarios para manejar el éxito del login
+    
     LaunchedEffect(authState.isAuthenticated) {
         if (authState.isAuthenticated) {
             onLoginSuccess()
@@ -82,7 +82,7 @@ fun LoginScreen(
                 modifier = Modifier.padding(32.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Imagen de logo arriba del título
+                
                 Image(
                     painter = painterResource(id = R.drawable.logodefault2),
                     contentDescription = "crimewave banner",
@@ -93,7 +93,7 @@ fun LoginScreen(
                     contentScale = ContentScale.Fit
                 )
 
-                // Título
+                
                 Text(
                     text = "INICIO DE SESIÓN\nSIGMA",
                     color = Color.White,
@@ -103,7 +103,7 @@ fun LoginScreen(
                     modifier = Modifier.padding(bottom = 24.dp)
                 )
 
-                // Línea decorativa
+                
                 Box(
                     modifier = Modifier
                         .width(200.dp)
@@ -122,7 +122,7 @@ fun LoginScreen(
 
                 Spacer(modifier = Modifier.height(32.dp))
 
-                // Campo E-MAIL
+                
                 Column {
                     Text(
                         text = "E-mail",
@@ -152,7 +152,7 @@ fun LoginScreen(
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                // Campo Contraseña
+                
                 Column {
                     Text(
                         text = "Contraseña",
@@ -183,9 +183,9 @@ fun LoginScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Enlace "Restablecer contraseña"
+                
                 TextButton(
-                    onClick = { /* TODO: Implementar restablecer contraseña */ }
+                    onClick = { /*Implementar restablecer contraseña en nuevas versiones, de momento solo visual */ }
                 ) {
                     Text(
                         text = "Restablecer contraseña",
@@ -197,7 +197,7 @@ fun LoginScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // Botón INICIAR SESIÓN
+                
                 Button(
                     onClick = {
                         if (isValidForm) {
@@ -238,7 +238,7 @@ fun LoginScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // Error message
+                
                 authState.error?.let { error ->
                     Text(
                         text = error,
@@ -250,7 +250,7 @@ fun LoginScreen(
                 }
 
 
-                // Enlace de registro
+                
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -273,7 +273,7 @@ fun LoginScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Imagen de logo abajo
+                
                 Image(
                     painter = painterResource(id = R.drawable.logodefault2),
                     contentDescription = "crimewave banner abajo",

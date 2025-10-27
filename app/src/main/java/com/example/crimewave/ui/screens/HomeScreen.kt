@@ -27,9 +27,8 @@ fun HomeScreen(
     onNavigateToCart: () -> Unit,
     isAdmin: Boolean = false
 ) {
-    // Obtener productos del ViewModel
     val allProducts by clothingViewModel.products
-    val featuredProducts = allProducts.take(6) // Mostrar los primeros 6 productos
+    val featuredProducts = allProducts.take(6) 
     val cartState by cartViewModel.cartState
 
     Scaffold(
@@ -37,7 +36,7 @@ fun HomeScreen(
             TopAppBar(
                 title = { Text("Catálago") },
                 actions = {
-                    // Botón del carrito con badge (solo para usuarios no administradores)
+                    
                     if (!isAdmin) {
                         Box {
                             IconButton(onClick = onNavigateToCart) {
