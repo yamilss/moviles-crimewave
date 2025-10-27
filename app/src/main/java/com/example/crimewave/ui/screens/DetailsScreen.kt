@@ -4,8 +4,12 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBackIos
+import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -42,6 +46,7 @@ fun DetailsScreen(
             description = "No se pudo encontrar el producto solicitado.",
             price = 0.0,
             imageUrl = "default_product",
+            imageUrls = listOf("default_product", "default_product_2", "default_product_3"),
             category = ProductType.POLERAS,
             isNew = false,
             sizes = listOf("N/A"),
@@ -77,15 +82,13 @@ fun DetailsScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Imagen del producto
-            ProductImage(
-                imageUrl = selectedProduct.imageUrl,
-                contentDescription = selectedProduct.name,
+            // Galería de imágenes del producto (3 imágenes)
+            ProductImageGallery(
+                images = selectedProduct.allImages,
+                productName = selectedProduct.name,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(300.dp)
-                    .clip(RoundedCornerShape(12.dp)),
-                contentScale = ContentScale.Crop
             )
 
             // Información principal del producto
@@ -224,19 +227,28 @@ fun DetailsScreen(
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
 
-                    // Solo mostrar botón "Agregar al Carrito" si no es admin y hay stock
-                    if (selectedProduct.stock > 0 && !cartViewModel.isCurrentUserAdmin()) {
+                    // Botón "Agregar al Carrito" - funcional para clientes, visual para administradores
+                    if (selectedProduct.stock > 0) {
                         Button(
                             onClick = {
                                 if (selectedSize.isNotEmpty()) {
-                                    cartViewModel.addToCart(selectedProduct, selectedSize)
-
-                                    // Mostrar mensaje de confirmación usando corrutina
-                                    coroutineScope.launch {
-                                        snackbarHostState.showSnackbar(
-                                            message = "✅ ${selectedProduct.name} agregado al carrito",
-                                            duration = SnackbarDuration.Short
-                                        )
+                                    if (cartViewModel.isCurrentUserAdmin()) {
+                                        // Admin: solo mostrar mensaje visual
+                                        coroutineScope.launch {
+                                            snackbarHostState.showSnackbar(
+                                                message = "🔍 Vista previa para administrador: ${selectedProduct.name}",
+                                                duration = SnackbarDuration.Long
+                                            )
+                                        }
+                                    } else {
+                                        // Cliente: agregar realmente al carrito
+                                        cartViewModel.addToCart(selectedProduct, selectedSize)
+                                        coroutineScope.launch {
+                                            snackbarHostState.showSnackbar(
+                                                message = "✅ ${selectedProduct.name} agregado al carrito",
+                                                duration = SnackbarDuration.Short
+                                            )
+                                        }
                                     }
                                 }
                             },
@@ -249,8 +261,21 @@ fun DetailsScreen(
                                 modifier = Modifier.size(20.dp)
                             )
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text("Agregar al Carrito")
+                            Text(
+                                if (cartViewModel.isCurrentUserAdmin()) "Vista Previa - Agregar" else "Agregar al Carrito"
+                            )
                         }
+                        
+                        // Mensaje informativo diferente según el tipo de usuario
+                        if (cartViewModel.isCurrentUserAdmin()) {
+                            Text(
+                                text = "* Los administradores ven vista previa - no agregan productos realmente",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color.Gray,
+                                modifier = Modifier.padding(top = 8.dp)
+                            )
+                        }
+                        
                         // Mensaje de error para talla/medida no seleccionada
                         if (selectedSize.isEmpty() && selectedProduct.sizes.isNotEmpty() && selectedProduct.sizes != listOf("N/A")) {
                             Text(
@@ -260,15 +285,6 @@ fun DetailsScreen(
                                 modifier = Modifier.padding(top = 8.dp)
                             )
                         }
-                    } else if (cartViewModel.isCurrentUserAdmin()) {
-                        // Mostrar mensaje para administradores
-                        Text(
-                            text = "Los administradores no pueden agregar productos al carrito",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = Color.Gray,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.fillMaxWidth()
-                        )
                     } else {
                         // Sin stock
                         Button(
@@ -282,20 +298,18 @@ fun DetailsScreen(
 
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    // Solo mostrar botón del carrito si no es admin
-                    if (!cartViewModel.isCurrentUserAdmin()) {
-                        OutlinedButton(
-                            onClick = onNavigateToCart,
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Icon(
-                                Icons.Default.ShoppingCart,
-                                contentDescription = null,
-                                modifier = Modifier.size(20.dp)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text("Ver el Carrito")
-                        }
+                    // Always show cart button for visual purposes
+                    OutlinedButton(
+                        onClick = onNavigateToCart,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Icon(
+                            Icons.Default.ShoppingCart,
+                            contentDescription = null,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Ver el Carrito")
                     }
                 }
             }
@@ -390,6 +404,171 @@ private fun NewBadge() {
             style = MaterialTheme.typography.labelSmall,
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
         )
+    }
+}
+
+@Composable
+private fun ProductImageGallery(
+    images: List<String>,
+    productName: String,
+    modifier: Modifier = Modifier
+) {
+    // Asegurar que siempre tengamos al menos una imagen válida
+    val safeImages = if (images.isEmpty()) {
+        listOf("default_product")
+    } else {
+        images
+    }
+    
+    val pagerState = rememberPagerState(pageCount = { safeImages.size })
+    val coroutineScope = rememberCoroutineScope()
+    
+    Column(modifier = modifier) {
+        // Card container para la galería
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        ) {
+            Box {
+                // Image pager - validar que tengamos imágenes válidas
+                if (safeImages.isNotEmpty()) {
+                    HorizontalPager(
+                        state = pagerState,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(280.dp)
+                    ) { page ->
+                        val imageUrl = safeImages.getOrNull(page) ?: "default_product"
+                        ProductImage(
+                            imageUrl = imageUrl,
+                            contentDescription = "$productName - Imagen ${page + 1}",
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clip(RoundedCornerShape(12.dp)),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
+                } else {
+                    // Fallback: mostrar imagen por defecto
+                    ProductImage(
+                        imageUrl = "default_product",
+                        contentDescription = productName,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(280.dp)
+                            .clip(RoundedCornerShape(12.dp)),
+                        contentScale = ContentScale.Crop
+                    )
+                }
+                
+                // Botones de navegación (solo si hay múltiples imágenes)
+                if (safeImages.size > 1) {
+                    // Botón anterior
+                    if (pagerState.currentPage > 0) {
+                        IconButton(
+                            onClick = {
+                                coroutineScope.launch {
+                                    pagerState.animateScrollToPage(pagerState.currentPage - 1)
+                                }
+                            },
+                            modifier = Modifier
+                                .align(Alignment.CenterStart)
+                                .padding(8.dp)
+                        ) {
+                            Surface(
+                                shape = RoundedCornerShape(50),
+                                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f)
+                            ) {
+                                Icon(
+                                    Icons.AutoMirrored.Filled.ArrowBackIos,
+                                    contentDescription = "Imagen anterior",
+                                    modifier = Modifier.padding(8.dp),
+                                    tint = MaterialTheme.colorScheme.onSurface
+                                )
+                            }
+                        }
+                    }
+                    
+                    // Botón siguiente
+                    if (pagerState.currentPage < safeImages.size - 1) {
+                        IconButton(
+                            onClick = {
+                                coroutineScope.launch {
+                                    pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                                }
+                            },
+                            modifier = Modifier
+                                .align(Alignment.CenterEnd)
+                                .padding(8.dp)
+                        ) {
+                            Surface(
+                                shape = RoundedCornerShape(50),
+                                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f)
+                            ) {
+                                Icon(
+                                    Icons.AutoMirrored.Filled.ArrowForwardIos,
+                                    contentDescription = "Imagen siguiente",
+                                    modifier = Modifier.padding(8.dp),
+                                    tint = MaterialTheme.colorScheme.onSurface
+                                )
+                            }
+                        }
+                    }
+                }
+                
+                // Overlay con información de imagen actual (solo si hay múltiples imágenes)
+                if (safeImages.size > 1) {
+                    Surface(
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(8.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f)
+                    ) {
+                        Text(
+                            text = "${pagerState.currentPage + 1}/${safeImages.size}",
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                }
+            }
+        }
+        
+        Spacer(modifier = Modifier.height(12.dp))
+        
+        // Page indicators mejorados - solo mostrar si hay más de una imagen
+        if (safeImages.size > 1) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                repeat(safeImages.size) { index ->
+                    val isSelected = pagerState.currentPage == index
+                    Surface(
+                        modifier = Modifier
+                            .size(if (isSelected) 12.dp else 8.dp)
+                            .padding(horizontal = 3.dp),
+                        shape = RoundedCornerShape(6.dp),
+                        color = if (isSelected) 
+                            MaterialTheme.colorScheme.primary 
+                        else 
+                            MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)
+                    ) {}
+                }
+            }
+            
+            // Texto instructivo
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "Desliza para ver más imágenes",
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
     }
 }
 

@@ -35,7 +35,7 @@ class ProductRepository(context: Context) {
                 description = "Diseño original de Satoru Gojo del anime Jujutsu Kaisen",
                 price = 22000.0,
                 imageUrl = "satorupolera",
-                imageUrls = listOf("satorupolera", "placeholder1", "placerholder2"),
+                imageUrls = listOf("satorupolera", "togahoodie", "placerholder2"),
                 category = ProductType.POLERAS,
                 isNew = true,
                 sizes = listOf("S", "M", "L", "XL")
